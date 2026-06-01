@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 FundTransactionType = Literal[
     "member_deposit",
     "session_charge",
-    "guest_collection",
+    "rounding_surplus",
     "manual_adjustment",
     "session_refund",
 ]
@@ -32,4 +32,16 @@ class FundTransactionRead(BaseModel):
     voided_at: datetime | None
     void_reason: str | None
 
+
+class FundSummaryRead(BaseModel):
+    member_total_balance: int
+    common_fund_balance: int
+    total_balance: int
+    active_member_count: int
+    low_balance_member_count: int
+    total_deposit_amount: int
+    total_session_charge_amount: int
+    total_rounding_surplus_amount: int
+
     model_config = {"from_attributes": True}
+

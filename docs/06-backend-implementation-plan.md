@@ -145,38 +145,7 @@ Rule:
   - `manual_adjustment`
   - `session_refund`
 
-## BE-03: Fixed schedules
-
-Muc tieu:
-
-- Quan ly lich choi co dinh.
-
-Bang:
-
-```text
-fixed_schedules
-- id
-- day_of_week
-- start_time
-- end_time
-- court_name
-- default_cost
-- is_active
-- created_at
-- updated_at
-```
-
-API:
-
-```text
-GET    /api/fixed-schedules
-POST   /api/fixed-schedules
-GET    /api/fixed-schedules/{id}
-PUT    /api/fixed-schedules/{id}
-DELETE /api/fixed-schedules/{id}
-```
-
-## BE-04: Play session preview
+## BE-03: Play session preview
 
 Muc tieu:
 
@@ -194,37 +163,43 @@ Body:
 ```json
 {
   "total_cost": 600000,
-  "member_ids": ["member-1", "member-2", "member-3"],
-  "guest_count": 2
+  "participants": [
+    {
+      "member_id": "member-1",
+      "slot_count": 1
+    },
+    {
+      "member_id": "member-2",
+      "slot_count": 2
+    }
+  ]
 }
 ```
 
 Cong thuc:
 
 ```text
-total_people = member_count + guest_count
-share_per_person = ceil(total_cost / total_people, lam tron len theo 1.000)
-member_total_charge = share_per_person * member_count
-guest_total_due = share_per_person * guest_count
-surplus = (member_total_charge + guest_total_due) - total_cost
+total_slots = sum(slot_count)
+cost_per_slot = ceil(total_cost / total_slots, lam tron len theo 1.000)
+charged_amount cua tung member = cost_per_slot * slot_count
+total_charged = sum(charged_amount)
+surplus = total_charged - total_cost
 ```
 
-## BE-05: Close play session
+## BE-04: Close play session
 
 Muc tieu:
 
 - Tao buoi choi thuc te.
-- Luu thanh vien tham gia.
-- Luu so luong khach vang lai.
+- Luu thanh vien tham gia va slot_count cua tung nguoi.
 - Tru tien quy tung thanh vien.
 - Ghi fund transaction cho tung nguoi.
-- Hien thi so tien phai thu khach vang lai.
 
 Bang:
 
 ```text
 play_sessions
-play_session_members
+play_session_participants
 ```
 
 API:
@@ -235,7 +210,7 @@ GET  /api/play-sessions
 GET  /api/play-sessions/{id}
 ```
 
-## BE-06: Auth and permission
+## BE-05: Auth and permission
 
 Lam sau khi nghiep vu chinh on.
 

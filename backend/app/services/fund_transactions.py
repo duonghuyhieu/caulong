@@ -1,11 +1,13 @@
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from app.models.fund_transaction import FundTransaction
 from app.models.member import Member
 from app.schemas.fund_transaction import MemberDepositCreate
+from app.core.config import get_settings
+
 
 
 def get_member_or_404(db: Session, member_id: str) -> Member:
@@ -61,3 +63,61 @@ def list_fund_transactions(
     statement = statement.order_by(FundTransaction.created_at.desc())
 
     return list(db.scalars(statement).all())
+
+
+def get_fund_summary(db: Session) -> dict:
+    settings = get_settings()
+
+    member_total_balance = db.scalar(select(func.coalesce(func.sum(Member.balance), 0))) or 0
+
+    common_fund_balance = db.scalar(
+        select(func.coalesce(func.sum(FundTransaction.amount), 0)).where(
+            FundTransaction.member_id.is_(None),
+            FundTransaction.voided_at.is_(None),
+        )
+    ) or 0
+
+    active_member_count = db.scalar(
+        select(func.count()).select_from(Member).where(Member.status == "active")
+    ) or 0
+
+    low_balance_member_count = db.scalar(
+        select(func.count())
+        .select_from(Member)
+        .where(
+            Member.status == "active",
+            Member.balance <= settings.low_balance_threshold,
+        )
+    ) or 0
+
+    total_deposit_amount = db.scalar(
+        select(func.coalesce(func.sum(FundTransaction.amount), 0)).where(
+            FundTransaction.type == "member_deposit",
+            FundTransaction.voided_at.is_(None),
+        )
+    ) or 0
+
+    total_session_charge_amount = db.scalar(
+        select(func.coalesce(func.sum(FundTransaction.amount), 0)).where(
+            FundTransaction.type == "session_charge",
+            FundTransaction.voided_at.is_(None),
+        )
+    ) or 0
+
+    total_rounding_surplus_amount = db.scalar(
+        select(func.coalesce(func.sum(FundTransaction.amount), 0)).where(
+            FundTransaction.type == "rounding_surplus",
+            FundTransaction.voided_at.is_(None),
+        )
+    ) or 0
+
+    return {
+        "member_total_balance": member_total_balance,
+        "common_fund_balance": common_fund_balance,
+        "total_balance": member_total_balance + common_fund_balance,
+        "active_member_count": active_member_count,
+        "low_balance_member_count": low_balance_member_count,
+        "total_deposit_amount": total_deposit_amount,
+        "total_session_charge_amount": abs(total_session_charge_amount),
+        "total_rounding_surplus_amount": total_rounding_surplus_amount,
+    }

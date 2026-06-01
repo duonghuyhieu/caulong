@@ -3,10 +3,17 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.member import Member
-from app.schemas.fund_transaction import FundTransactionRead, MemberDepositCreate
 from app.services.auth import require_treasurer
-from app.services.fund_transactions import deposit_member_fund, list_fund_transactions
-
+from app.services.fund_transactions import (
+    deposit_member_fund,
+    get_fund_summary,
+    list_fund_transactions,
+)
+from app.schemas.fund_transaction import (
+    FundSummaryRead,
+    FundTransactionRead,
+    MemberDepositCreate,
+)
 
 router = APIRouter(prefix="/fund", tags=["fund"])
 
@@ -26,3 +33,11 @@ def deposit_member_fund_endpoint(
     current_member: Member = Depends(require_treasurer),
 ):
     return deposit_member_fund(db, payload, current_member)
+
+
+@router.get("/summary", response_model=FundSummaryRead)
+def get_fund_summary_endpoint(
+    db: Session = Depends(get_db),
+    current_member: Member = Depends(require_treasurer),
+):
+    return get_fund_summary(db)

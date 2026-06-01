@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-me-in-local-env"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
+    low_balance_threshold: int = 50000
+    money_rounding_unit: int = 1000
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

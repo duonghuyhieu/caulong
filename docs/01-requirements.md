@@ -2,9 +2,17 @@
 
 ## Bai toan
 
-Nhom cau long co nhieu thanh vien. Moi nguoi nop tien vao quy ca nhan. Khi di choi, chi phi buoi choi se duoc tru vao quy cua nhung thanh vien tham gia.
+Nhom cau long co nhieu thanh vien. Moi nguoi nop tien vao quy ca nhan. Sau moi buoi choi, nguoi cam quy nhap tong chi phi buoi do, chon thanh vien tham gia va so slot cua tung thanh vien. He thong tu chia tien theo slot va tru vao quy cua tung thanh vien.
 
-Ngoai thanh vien chinh thuc, moi buoi co the co khach vang lai. Khach vang lai khong co tai khoan quy co dinh, nhung co the tra tien truc tiep cho buoi do.
+Khong quan ly khach vang lai rieng. Neu mot thanh vien dan theo ban choi ngoai nhom, thanh vien do se bi tinh them slot.
+
+Vi du:
+
+```text
+Nam di mot minh       slot_count = 1
+Minh dan theo 1 ban   slot_count = 2
+Hieu dan theo 2 ban   slot_count = 3
+```
 
 ## Doi tuong chinh
 
@@ -12,33 +20,26 @@ Ngoai thanh vien chinh thuc, moi buoi co the co khach vang lai. Khach vang lai k
 
 Thong tin can co:
 
+- Username dang nhap.
 - Ten.
 - Vai tro: nguoi choi hoac nguoi cam quy.
 - Trang thai: dang choi, tam nghi.
 - So du quy.
 - Canh bao sap het quy theo mot nguong chung cua he thong.
 
-### Lich co dinh
-
-Vi du:
-
-- Thu 3, 19:00 - 21:00, san A.
-- Thu 6, 20:00 - 22:00, san B.
-
-Lich co dinh giup tao buoi choi nhanh hon.
-
 ### Buoi choi
 
 Moi buoi can luu:
 
-- Ngay choi.
-- Lich co dinh neu co.
+- Ngay/gio choi.
 - Tong chi phi.
 - Thanh vien tham gia.
-- Khach vang lai.
-- So tien khach vang lai da tra.
+- So slot cua tung thanh vien.
+- Don gia moi slot.
 - So tien moi thanh vien bi tru.
 - Ghi chu.
+
+Khong can luu san, gio co dinh, lich co dinh, khach vang lai.
 
 ### So quy
 
@@ -47,34 +48,56 @@ Moi thay doi tien phai co lich su:
 - Nop quy.
 - Tru tien buoi choi.
 - Dieu chinh so du.
-- Tien khach vang lai tra.
+- Hoan tien neu can.
 
 ## Quy tac chia tien buoi choi
 
-Cong thuc mac dinh:
+Input:
 
 ```text
-tien_khach_tra = tong tien cua tat ca khach vang lai
-phan_con_lai = max(tong_chi_phi - tien_khach_tra, 0)
-tien_moi_thanh_vien = ceil(phan_con_lai / so_thanh_vien_tham_gia)
-tien_du = max(tien_khach_tra - tong_chi_phi, 0)
+total_cost
+participants: member_id + slot_count
+```
+
+Cong thuc:
+
+```text
+total_slots = sum(slot_count)
+cost_per_slot = ceil(total_cost / total_slots, lam tron len theo MONEY_ROUNDING_UNIT)
+charged_amount cua tung member = cost_per_slot * slot_count
+surplus_amount = sum(charged_amount) - total_cost
 ```
 
 Vi du:
 
 ```text
 Tong chi phi: 600.000
-Thanh vien tham gia: 5 nguoi
-Khach vang lai tra: 100.000
+Nam: 1 slot
+Minh: 2 slot
+Hieu: 3 slot
 
-Phan con lai = 600.000 - 100.000 = 500.000
-Moi thanh vien bi tru = 500.000 / 5 = 100.000
+Tong slot = 6
+Moi slot = 100.000
+
+Nam bi tru: 100.000
+Minh bi tru: 200.000
+Hieu bi tru: 300.000
+```
+
+Vi du co lam tron:
+
+```text
+Tong chi phi: 550.000
+Tong slot: 6
+Lam tron theo 1.000
+
+Moi slot = ceil(550.000 / 6, 1.000) = 92.000
+Tong tru = 552.000
+surplus_amount = 2.000
 ```
 
 ## Cau hoi can chot sau
 
-- Khach vang lai tra theo gia co dinh hay nhap tuy tung buoi?
-- Neu thanh vien het quy/bi am quy thi co cho chot buoi khong?
-- Co can chia theo so set/thoi gian choi khong, hay chia deu?
+- Thanh vien bi am quy co duoc tiep tuc chot buoi khong?
+- Buoi da chot co cho sua khong, hay chi tao giao dich dieu chinh/hoan tien?
 - Co can nhieu nguoi cam quy khong?
-- Co can xoa/sua buoi da chot khong, hay chi tao giao dich dieu chinh?
