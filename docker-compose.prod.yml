@@ -1,0 +1,58 @@
+# Production compose cho caulong — tuan theo AI PROTOCOL trong README_SYSTEM:
+#   - mang internet_boundary la external (Cloudflare Tunnel ket noi qua day)
+#   - KHONG mo ports ra host (truy cap qua tunnel)
+#   - du lieu DB nam tren HDD: /mnt/data/caulong/
+# Chay: docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: caulong-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: badminton_fund
+      POSTGRES_USER: badminton
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD chua duoc set trong .env}
+    volumes:
+      - /mnt/data/caulong/postgres_data:/var/lib/postgresql/data
+    networks:
+      - internet_boundary
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U badminton -d badminton_fund"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    image: caulong-backend
+    container_name: caulong-backend
+    restart: unless-stopped
+    environment:
+      # Host = ten container postgres (cung mang internet_boundary).
+      DATABASE_URL: postgresql+psycopg://badminton:${POSTGRES_PASSWORD}@caulong-postgres:5432/badminton_fund
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY chua duoc set trong .env}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-https://caulong.huyhieu.online}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internet_boundary
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # NEXT_PUBLIC_* phai co luc BUILD (duoc nhung tinh vao bundle).
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:?NEXT_PUBLIC_API_BASE_URL chua duoc set trong .env}
+    image: caulong-frontend
+    container_name: caulong-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - internet_boundary
+
+networks:
+  internet_boundary:
+    external: true
