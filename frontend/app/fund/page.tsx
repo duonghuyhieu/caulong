@@ -117,7 +117,7 @@ export default function FundPage() {
 
         {error && <p className="error">{error}</p>}
         {loading ? (
-          <p className="muted">Đang tải...</p>
+          <p className="muted center">Đang tải...</p>
         ) : (
           <table className="table">
             <thead>
@@ -152,7 +152,7 @@ export default function FundPage() {
               ))}
               {transactions.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="muted">
+                  <td colSpan={6} className="table-empty">
                     Chưa có giao dịch.
                   </td>
                 </tr>

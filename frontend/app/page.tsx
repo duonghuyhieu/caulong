@@ -1,37 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { fundApi, membersApi, playSessionsApi, ApiError } from "@/lib/api";
-import { formatMoney, formatDate } from "@/lib/format";
+import { useEffect, useState } from "react";
+import { fundApi, ApiError } from "@/lib/api";
+import { formatMoney } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
-import type { FundSummary, Member, PlaySession } from "@/lib/types";
+import type { FundSummary } from "@/lib/types";
 
 export default function DashboardPage() {
   const { member } = useAuth();
   const isTreasurer = member?.role === "treasurer";
 
   const [summary, setSummary] = useState<FundSummary | null>(null);
-  const [sessions, setSessions] = useState<PlaySession[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const memberName = useMemo(() => {
-    const map = new Map<string, string>();
-    members.forEach((m) => map.set(m.id, m.name));
-    return map;
-  }, [members]);
 
   useEffect(() => {
     async function load() {
       try {
-        const summaryData = await fundApi.summary();
-        setSummary(summaryData);
-        // Người chơi: gộp luôn lịch sử buổi chơi vào màn này.
-        if (member && member.role !== "treasurer") {
-          setSessions(await playSessionsApi.list());
-          setMembers(await membersApi.list());
-        }
+        setSummary(await fundApi.summary());
       } catch (err) {
         setError(err instanceof ApiError ? err.message : "Lỗi tải dữ liệu");
       } finally {
@@ -39,9 +25,9 @@ export default function DashboardPage() {
       }
     }
     load();
-  }, [member]);
+  }, []);
 
-  if (loading) return <p className="muted">Đang tải...</p>;
+  if (loading) return <p className="muted center">Đang tải...</p>;
   if (error) return <p className="error">{error}</p>;
   if (!summary) return null;
 
@@ -73,50 +59,6 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
-
-      {/* Người chơi: lịch sử buổi chơi nằm ngay dưới, không tách màn riêng */}
-      {!isTreasurer && (
-        <div className="card">
-          <h2>Lịch sử buổi chơi</h2>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Ngày</th>
-                <th className="right">Tổng chi</th>
-                <th className="right">Mỗi slot</th>
-                <th>Người tham gia</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map((s) => (
-                <tr key={s.id}>
-                  <td data-label="Ngày" className="muted">
-                    {formatDate(s.played_at)}
-                  </td>
-                  <td data-label="Tổng chi" className="right">
-                    {formatMoney(s.total_cost)}
-                  </td>
-                  <td data-label="Mỗi slot" className="right">
-                    {formatMoney(s.cost_per_slot)}
-                  </td>
-                  <td data-label="Người tham gia">
-                    {s.participants
-                      .map((p) => `${memberName.get(p.member_id) ?? "?"} (${p.slot_count})`)
-                      .join(", ")}
-                  </td>
-                </tr>
-              ))}
-              {sessions.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="muted">
-                    Chưa có buổi chơi nào.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 }

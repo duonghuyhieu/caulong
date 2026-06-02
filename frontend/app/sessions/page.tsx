@@ -85,7 +85,7 @@ export default function SessionsPage() {
         <h2>Lịch sử buổi chơi</h2>
         {error && <p className="error">{error}</p>}
         {loading ? (
-          <p className="muted">Đang tải...</p>
+          <p className="muted center">Đang tải...</p>
         ) : (
           <table className="table">
             <thead>
@@ -113,7 +113,7 @@ export default function SessionsPage() {
               ))}
               {sessions.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="muted">
+                  <td colSpan={5} className="table-empty">
                     Chưa có buổi chơi nào.
                   </td>
                 </tr>

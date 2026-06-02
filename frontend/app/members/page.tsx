@@ -70,7 +70,7 @@ export default function MembersPage() {
         <h2>Danh sách</h2>
         {error && <p className="error">{error}</p>}
         {loading ? (
-          <p className="muted">Đang tải...</p>
+          <p className="muted center">Đang tải...</p>
         ) : (
           <table className="table">
             <thead>
@@ -113,7 +113,7 @@ export default function MembersPage() {
               ))}
               {members.length === 0 && (
                 <tr>
-                  <td colSpan={isTreasurer ? 6 : 4} className="muted">
+                  <td colSpan={isTreasurer ? 6 : 4} className="table-empty">
                     Chưa có thành viên.
                   </td>
                 </tr>
