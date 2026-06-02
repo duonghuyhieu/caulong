@@ -3,14 +3,14 @@
 
 FROM node:22-alpine AS deps
 WORKDIR /app
-# Pin pnpm khop lockfileVersion 9.0
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# pnpm 10: pnpm-workspace.yaml duoc dung lam file settings (khong can field packages).
+RUN npm install -g pnpm@10
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM node:22-alpine AS builder
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+RUN npm install -g pnpm@10
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # NEXT_PUBLIC_* duoc nhung vao bundle luc BUILD -> phai truyen URL API o day.
