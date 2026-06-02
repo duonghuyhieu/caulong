@@ -28,11 +28,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="main" style={{ maxWidth: 360 }}>
-      <div className="card">
+    <div className="auth">
+      <div className="card auth-card">
+        <span className="auth-brand">Quỹ Cầu Lông</span>
         <h1>Đăng nhập</h1>
-        <p className="muted" style={{ marginTop: 0 }}>
-          Quỹ Cầu Lông
+        <p className="muted" style={{ marginTop: "-0.6rem" }}>
+          Sổ quỹ minh bạch cho nhóm cầu lông
         </p>
         <form
           onSubmit={(e) => {

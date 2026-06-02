@@ -562,6 +562,34 @@ button.ghost:hover {
   color: var(--muted);
 }
 
+/* ===== Man dang nhap (can giua, full man hinh, uu tien mobile) ===== */
+.auth {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  margin: 0;
+  padding: 1.9rem 1.7rem;
+}
+.auth-brand {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+.auth-brand::first-letter {
+  color: var(--accent);
+}
+
 /* ===== Phan trang ===== */
 .pager {
   display: flex;
