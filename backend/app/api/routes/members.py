@@ -3,13 +3,14 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.member import Member
-from app.schemas.member import MemberCreate, MemberRead, MemberUpdate
+from app.schemas.member import MemberCreate, MemberRead, MemberStatusUpdate, MemberUpdate
 from app.services.auth import get_current_member, require_treasurer
 from app.services.members import (
     create_member,
     get_member,
     list_members,
     update_member,
+    update_member_status,
 )
 
 
@@ -50,3 +51,13 @@ def update_member_endpoint(
     current_member: Member = Depends(require_treasurer),
 ):
     return update_member(db, member_id, payload)
+
+
+@router.patch("/{member_id}/status", response_model=MemberRead)
+def update_member_status_endpoint(
+    member_id: str,
+    payload: MemberStatusUpdate,
+    db: Session = Depends(get_db),
+    current_member: Member = Depends(require_treasurer),
+):
+    return update_member_status(db, member_id, payload)

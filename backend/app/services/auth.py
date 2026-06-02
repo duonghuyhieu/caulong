@@ -4,10 +4,15 @@ from jwt import InvalidTokenError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.security import create_access_token, decode_access_token, verify_password
+from app.core.security import (
+    create_access_token,
+    decode_access_token,
+    hash_password,
+    verify_password,
+)
 from app.db.session import get_db
 from app.models.member import Member
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.auth import ChangePasswordRequest, LoginRequest, TokenResponse
 
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -21,12 +26,26 @@ def authenticate_member(db: Session, payload: LoginRequest) -> TokenResponse:
         raise_invalid_credentials()
 
     if member.status != "active":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Member is inactive")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tài khoản đã bị khoá")
 
     if not verify_password(payload.password, member.password_hash):
         raise_invalid_credentials()
 
     return TokenResponse(access_token=create_access_token(subject=member.id))
+
+
+def change_password(
+    db: Session,
+    member: Member,
+    payload: ChangePasswordRequest,
+) -> None:
+    if member.password_hash is None or not verify_password(
+        payload.current_password, member.password_hash
+    ):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Mật khẩu hiện tại không đúng")
+
+    member.password_hash = hash_password(payload.new_password)
+    db.commit()
 
 
 def get_current_member(
@@ -54,13 +73,16 @@ def get_current_member(
 
 def require_treasurer(current_member: Member = Depends(get_current_member)) -> Member:
     if current_member.role != "treasurer":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Treasurer role required")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Chỉ thủ quỹ mới có quyền thực hiện thao tác này",
+        )
     return current_member
 
 
 def raise_invalid_credentials() -> None:
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid credentials",
+        detail="Sai tài khoản hoặc mật khẩu",
         headers={"WWW-Authenticate": "Bearer"},
     )

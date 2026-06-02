@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.models.member import Member
-from app.schemas.member import MemberCreate, MemberUpdate
+from app.schemas.member import MemberCreate, MemberStatusUpdate, MemberUpdate
 
 
 def list_members(db: Session) -> list[Member]:
@@ -75,6 +75,19 @@ def update_member(db: Session, member_id: str, payload: MemberUpdate) -> Member:
         db.rollback()
         raise_member_integrity_error(error)
 
+    db.refresh(member)
+
+    return member
+
+
+def update_member_status(
+    db: Session, member_id: str, payload: MemberStatusUpdate
+) -> Member:
+    member = get_member(db, member_id)
+
+    member.status = payload.status
+
+    db.commit()
     db.refresh(member)
 
     return member

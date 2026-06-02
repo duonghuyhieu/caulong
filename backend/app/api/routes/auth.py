@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.member import Member
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.auth import ChangePasswordRequest, LoginRequest, TokenResponse
 from app.schemas.member import MemberRead
-from app.services.auth import authenticate_member, get_current_member
+from app.services.auth import authenticate_member, change_password, get_current_member
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -19,3 +19,12 @@ def login_endpoint(payload: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=MemberRead)
 def me_endpoint(current_member: Member = Depends(get_current_member)):
     return current_member
+
+
+@router.post("/change-password", status_code=204)
+def change_password_endpoint(
+    payload: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_member: Member = Depends(get_current_member),
+):
+    change_password(db, current_member, payload)

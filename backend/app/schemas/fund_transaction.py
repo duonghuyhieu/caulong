@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 FundTransactionType = Literal[
@@ -10,6 +10,7 @@ FundTransactionType = Literal[
     "rounding_surplus",
     "manual_adjustment",
     "session_refund",
+    "common_fund_expense",
 ]
 
 
@@ -17,6 +18,26 @@ class MemberDepositCreate(BaseModel):
     member_id: str
     amount: int = Field(gt=0)
     description: str = Field(min_length=1, max_length=500)
+
+
+class CommonFundExpenseCreate(BaseModel):
+    """Chi tien tu quy chung cho hoat dong tap the (amount > 0 la so tien chi ra)."""
+
+    amount: int = Field(gt=0)
+    description: str = Field(min_length=1, max_length=500)
+
+
+class FundAdjustmentCreate(BaseModel):
+    member_id: str
+    amount: int = Field(description="Duong la cong them, am la tru bot. Khong duoc bang 0.")
+    description: str = Field(min_length=1, max_length=500)
+
+    @field_validator("amount")
+    @classmethod
+    def amount_not_zero(cls, value: int) -> int:
+        if value == 0:
+            raise ValueError("amount khong duoc bang 0")
+        return value
 
 
 class FundTransactionRead(BaseModel):

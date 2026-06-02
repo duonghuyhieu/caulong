@@ -25,6 +25,10 @@ class MemberUpdate(MemberBase):
     pass
 
 
+class MemberStatusUpdate(BaseModel):
+    status: MemberStatus
+
+
 class MemberRead(MemberBase):
     id: str
     balance: int

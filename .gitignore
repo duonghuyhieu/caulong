@@ -16,3 +16,6 @@ backend/data/*.sqlite3
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Playwright MCP artifacts (console logs, page snapshots)
+.playwright-mcp/
