@@ -19,9 +19,10 @@ export default function MembersPage() {
   const [editing, setEditing] = useState<Member | null>(null);
 
   async function loadMembers() {
-    setError(null);
     try {
-      setMembers(await membersApi.list());
+      const data = await membersApi.list();
+      setMembers(data);
+      setError(null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Lỗi tải danh sách");
     } finally {
@@ -29,9 +30,19 @@ export default function MembersPage() {
     }
   }
 
+  // Tai lan dau (mount): dinh nghia trong effect + setter truc tiep de khong
+  // vi pham react-hooks/set-state-in-effect.
   useEffect(() => {
-    loadMembers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    async function init() {
+      try {
+        setMembers(await membersApi.list());
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : "Lỗi tải danh sách");
+      } finally {
+        setLoading(false);
+      }
+    }
+    init();
   }, []);
 
   async function toggleStatus(m: Member) {

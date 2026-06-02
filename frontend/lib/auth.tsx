@@ -21,16 +21,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Khoi phuc phien neu da co token
-    if (!getToken()) {
-      setLoading(false);
-      return;
-    }
-    authApi
-      .me()
-      .then(setMember)
-      .catch(() => setToken(null)) // token het han/hong -> xoa
-      .finally(() => setLoading(false));
+    // Khoi phuc phien neu da co token. Khong goi setState dong bo trong than effect:
+    // moi nhanh deu ket thuc o .finally (microtask) de tranh cascading render.
+    const restore = getToken()
+      ? authApi
+          .me()
+          .then(setMember)
+          .catch(() => setToken(null)) // token het han/hong -> xoa
+      : Promise.resolve();
+    restore.finally(() => setLoading(false));
   }, []);
 
   async function login(username: string, password: string) {

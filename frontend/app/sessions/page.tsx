@@ -41,22 +41,21 @@ export default function SessionsPage() {
     setPage(1);
   }
 
-  async function loadAll() {
-    setError(null);
-    try {
-      // Tải members để hiển thị tên người tham gia (player cũng được phép GET /members).
-      setMembers(await membersApi.list());
-      await loadSessions();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Lỗi tải dữ liệu");
-    } finally {
-      setLoading(false);
-    }
-  }
-
+  // Tai du lieu lan dau (mount). Dinh nghia trong effect + setter truc tiep
+  // de khong vi pham react-hooks/set-state-in-effect.
   useEffect(() => {
-    loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    async function init() {
+      try {
+        // Tải members để hiển thị tên người tham gia (player cũng được phép GET /members).
+        setMembers(await membersApi.list());
+        setSessions(await playSessionsApi.list());
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : "Lỗi tải dữ liệu");
+      } finally {
+        setLoading(false);
+      }
+    }
+    init();
   }, []);
 
   return (
@@ -129,8 +128,8 @@ export default function SessionsPage() {
             totalPages={totalPages}
             total={sessions.length}
             unit="buổi"
-            onPrev={() => setPage((p) => Math.max(1, p - 1))}
-            onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+            onPrev={() => setPage(safePage - 1)}
+            onNext={() => setPage(safePage + 1)}
           />
         )}
       </div>

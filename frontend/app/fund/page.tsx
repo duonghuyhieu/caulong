@@ -41,22 +41,21 @@ export default function FundPage() {
     }
   }
 
-  async function loadAll() {
-    setError(null);
-    try {
-      setMembers(await membersApi.list());
-      setSummary(await fundApi.summary());
-      await loadTransactions(filterMemberId);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Lỗi tải dữ liệu");
-    } finally {
-      setLoading(false);
-    }
-  }
-
+  // Tai du lieu lan dau (mount). Dinh nghia trong effect + dung setter truc tiep
+  // de khong vi pham react-hooks/set-state-in-effect.
   useEffect(() => {
-    loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    async function init() {
+      try {
+        setMembers(await membersApi.list());
+        setSummary(await fundApi.summary());
+        setTransactions(await fundApi.transactions(undefined));
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : "Lỗi tải dữ liệu");
+      } finally {
+        setLoading(false);
+      }
+    }
+    init();
   }, []);
 
   function onFilterChange(memberId: string) {
@@ -168,8 +167,8 @@ export default function FundPage() {
             totalPages={totalPages}
             total={transactions.length}
             unit="giao dịch"
-            onPrev={() => setPage((p) => Math.max(1, p - 1))}
-            onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+            onPrev={() => setPage(safePage - 1)}
+            onNext={() => setPage(safePage + 1)}
           />
         )}
       </div>
