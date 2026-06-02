@@ -12,17 +12,17 @@ import { useAuth } from "@/lib/auth";
 import { authApi, ApiError } from "@/lib/api";
 import { Dialog } from "@/components/Dialog";
 
-// Player chi co 1 man "Tong quan" (da gop ca lich su buoi choi vao trong).
-// "Buoi choi" la man quan ly rieng -> chi thu quy.
+// Player XEM duoc moi man (chi doc). Cac nut them/sua/nop/dieu chinh
+// deu da gate theo isTreasurer ben trong tung trang.
 const NAV_LINKS = [
   { href: "/", label: "Tổng quan", treasurerOnly: false },
   { href: "/members", label: "Thành viên", treasurerOnly: false },
-  { href: "/fund", label: "Sổ quỹ", treasurerOnly: true },
-  { href: "/sessions", label: "Buổi chơi", treasurerOnly: true },
+  { href: "/fund", label: "Sổ quỹ", treasurerOnly: false },
+  { href: "/sessions", label: "Buổi chơi", treasurerOnly: false },
 ];
 
-// Player duoc XEM danh sach thanh vien (chi doc), nhung khong vao so quy.
-const TREASURER_ONLY_PATHS = ["/fund"];
+// Khong con route nao chan han player — moi thao tac ghi da gate trong trang.
+const TREASURER_ONLY_PATHS: string[] = [];
 
 // Icon tu ve (tranh bo icon mac dinh), net mong dong nhat.
 const ICONS: Record<string, ReactNode> = {

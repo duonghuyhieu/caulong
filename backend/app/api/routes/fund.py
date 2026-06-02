@@ -25,7 +25,8 @@ router = APIRouter(prefix="/fund", tags=["fund"])
 def list_fund_transactions_endpoint(
     member_id: str | None = None,
     db: Session = Depends(get_db),
-    current_member: Member = Depends(require_treasurer),
+    # Player cung duoc XEM lich su giao dich (so quy minh bach). Chi doc.
+    current_member: Member = Depends(get_current_member),
 ):
     return list_fund_transactions(db, member_id=member_id)
 
