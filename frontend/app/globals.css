@@ -589,6 +589,14 @@ button.ghost:hover {
 .auth-brand::first-letter {
   color: var(--accent);
 }
+.auth-version {
+  margin: 1.4rem 0 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
 
 /* ===== Phan trang ===== */
 .pager {
