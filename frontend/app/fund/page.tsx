@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { fundApi, membersApi, ApiError } from "@/lib/api";
-import { formatMoney, formatDateTime, TRANSACTION_TYPE_LABEL } from "@/lib/format";
+import { formatMoney, formatDate, formatDateTime, TRANSACTION_TYPE_LABEL } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { Dialog } from "@/components/Dialog";
 import { Pager } from "@/components/Pager";
@@ -22,8 +22,18 @@ export default function FundPage() {
   const [summary, setSummary] = useState<FundSummary | null>(null);
   const [dialog, setDialog] = useState<"deposit" | "adjust" | "common" | null>(null);
   const [page, setPage] = useState(1);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const PAGE_SIZE = 10;
+
+  function toggleRow(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const memberName = useMemo(() => {
     const map = new Map<string, string>();
@@ -154,47 +164,65 @@ export default function FundPage() {
         {error && <p className="error">{error}</p>}
         {loading ? (
           <p className="muted center">Đang tải...</p>
+        ) : transactions.length === 0 ? (
+          <p className="muted center" style={{ padding: "1.2rem 0" }}>Chưa có giao dịch.</p>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Thời gian</th>
-                <th>Loại</th>
-                <th>Thành viên</th>
-                <th className="right">Số tiền</th>
-                <th className="right">Số dư sau</th>
-                <th>Ghi chú</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pageItems.map((t) => (
-                <tr key={t.id}>
-                  <td data-label="Thời gian" className="muted">{formatDateTime(t.created_at)}</td>
-                  <td data-label="Loại">{TRANSACTION_TYPE_LABEL[t.type] ?? t.type}</td>
-                  <td data-label="Thành viên">{t.member_id ? memberName.get(t.member_id) ?? "?" : "Quỹ chung"}</td>
-                  <td
-                    data-label="Số tiền"
-                    className="right"
-                    style={{ color: t.amount < 0 ? "var(--neg)" : "var(--pos)" }}
+          <div className="xlist">
+            {pageItems.map((t) => {
+              const open = expanded.has(t.id);
+              return (
+                <div className={`xrow${open ? " open" : ""}`} key={t.id}>
+                  <button
+                    type="button"
+                    className="xrow-head"
+                    onClick={() => toggleRow(t.id)}
+                    aria-expanded={open}
                   >
-                    {t.amount > 0 ? "+" : ""}
-                    {formatMoney(t.amount)}
-                  </td>
-                  <td data-label="Số dư sau" className="right">
-                    {t.balance_after === null ? "—" : formatMoney(t.balance_after)}
-                  </td>
-                  <td data-label="Ghi chú" className="muted">{t.description}</td>
-                </tr>
-              ))}
-              {transactions.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="table-empty">
-                    Chưa có giao dịch.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    <span className="xrow-main">
+                      <span className="xrow-title">{TRANSACTION_TYPE_LABEL[t.type] ?? t.type}</span>
+                      <span className="xrow-sub">{formatDate(t.created_at)}</span>
+                    </span>
+                    <span
+                      className="xrow-amount"
+                      style={{ color: t.amount < 0 ? "var(--neg)" : "var(--pos)" }}
+                    >
+                      {t.amount > 0 ? "+" : ""}
+                      {formatMoney(t.amount)}
+                    </span>
+                    <Chevron />
+                  </button>
+                  {open && (
+                    <div className="xrow-detail">
+                      <div className="drow">
+                        <span className="k">Thời gian</span>
+                        <span className="v">{formatDateTime(t.created_at)}</span>
+                      </div>
+                      {scope === "all" && (
+                        <div className="drow">
+                          <span className="k">Thành viên</span>
+                          <span className="v">
+                            {t.member_id ? memberName.get(t.member_id) ?? "?" : "Quỹ chung"}
+                          </span>
+                        </div>
+                      )}
+                      <div className="drow">
+                        <span className="k">Số dư sau</span>
+                        <span className="v">
+                          {t.balance_after === null ? "—" : formatMoney(t.balance_after)}
+                        </span>
+                      </div>
+                      {t.description && (
+                        <div className="drow">
+                          <span className="k">Ghi chú</span>
+                          <span className="v">{t.description}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
 
         {!loading && totalPages > 1 && (
@@ -466,5 +494,23 @@ function AdjustForm({ members, onDone }: { members: Member[]; onDone: () => void
           {submitting ? "Đang lưu..." : "Điều chỉnh"}
         </button>
       </form>
+  );
+}
+
+// Mui ten xo (xoay khi mo)
+function Chevron() {
+  return (
+    <svg
+      className="xrow-chevron"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
   );
 }

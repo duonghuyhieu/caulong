@@ -1,39 +1,88 @@
+/* ============================================================
+   Quỹ Cầu Lông — giao diện gọn, hiện đại, có theme sáng/tối.
+   Token dùng chung cho cả 2 theme; đổi theme = đổi data-theme
+   trên <html>. Mặc định (không có attr) = tối.
+   ============================================================ */
+
+/* ---------- Theme TỐI (mặc định) ---------- */
 :root {
-  /* ===== Arena / Scoreboard — nen toi sau + 1 accent lime dien (the thao) ===== */
-  --bg: #0b0d11;
-  --bg-tint: #0f1218;
-  --surface: #14171e;
-  --surface-2: #1a1e27;
-  --surface-3: #20252f;
+  color-scheme: dark;
 
-  --ink: #f1f4f8;
-  --ink-soft: #c5cbd6;
-  --muted: #8b93a3;
+  --bg: #0d1117;
+  --bg-tint: #11161f;
+  --surface: #161b22;
+  --surface-2: #1c2330;
+  --surface-3: #232c3b;
 
-  --line: #262b35;
-  --line-soft: #1d222b;
+  --ink: #e7edf4;
+  --ink-soft: #b3bdcb;
+  --muted: #7c8694;
 
-  /* Accent duy nhat: cam dien "smash" — nang luong cao, tuong phan tren nen toi */
-  --accent: #ff5a1f;
-  --accent-deep: #ff7a45;
-  --accent-tint: rgba(255, 90, 31, 0.14);
-  --accent-line: rgba(255, 90, 31, 0.34);
-  --on-accent: #11070a;
+  --line: #232b37;
+  --line-soft: #1a212b;
 
-  /* Mau trang thai tach rieng accent (du lieu thu/chi) */
-  --danger: #ff5470;
-  --danger-tint: rgba(255, 84, 112, 0.13);
+  /* Accent thương hiệu: indigo — tách bạch khỏi xanh/đỏ của dòng tiền */
+  --accent: #6366f1;
+  --accent-deep: #818cf8;
+  --accent-tint: rgba(99, 102, 241, 0.16);
+  --accent-line: rgba(99, 102, 241, 0.42);
+  --on-accent: #ffffff;
 
-  --pos: #3fe08a;
-  --neg: #ff5470;
+  --pos: #3fb950;
+  --neg: #f85149;
+  --danger: #f85149;
+  --danger-tint: rgba(248, 81, 73, 0.13);
 
-  /* Bong do tinh te tren nen toi (khong glow) */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow: 0 24px 50px -28px rgba(0, 0, 0, 0.75);
+  --shadow: 0 20px 45px -26px rgba(0, 0, 0, 0.72);
 
-  --r-sm: 8px;
-  --r: 12px;
-  --r-lg: 16px;
+  --page-bg:
+    radial-gradient(1100px 560px at 88% -12%, rgba(99, 102, 241, 0.10), transparent 60%),
+    var(--bg);
+  --grain-opacity: 0.035;
+}
+
+/* ---------- Theme SÁNG ---------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f5f6f8;
+  --bg-tint: #eef0f3;
+  --surface: #ffffff;
+  --surface-2: #f4f5f7;
+  --surface-3: #e9ebef;
+
+  --ink: #181d27;
+  --ink-soft: #3c4350;
+  --muted: #6a7280;
+
+  --line: #e4e7ec;
+  --line-soft: #eef0f3;
+
+  --accent: #4f46e5;
+  --accent-deep: #4338ca;
+  --accent-tint: rgba(79, 70, 229, 0.09);
+  --accent-line: rgba(79, 70, 229, 0.28);
+  --on-accent: #ffffff;
+
+  --pos: #15803d;
+  --neg: #dc2626;
+  --danger: #dc2626;
+  --danger-tint: rgba(220, 38, 38, 0.08);
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow: 0 16px 38px -18px rgba(16, 24, 40, 0.22);
+
+  --page-bg:
+    radial-gradient(1100px 560px at 88% -12%, rgba(79, 70, 229, 0.06), transparent 60%),
+    var(--bg);
+  --grain-opacity: 0;
+}
+
+:root {
+  --r-sm: 7px;
+  --r: 10px;
+  --r-lg: 14px;
   --r-pill: 999px;
 
   --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
@@ -58,25 +107,23 @@ body {
 
 body {
   min-height: 100dvh;
-  background:
-    radial-gradient(900px 480px at 88% -8%, rgba(255, 90, 31, 0.09), transparent 62%),
-    radial-gradient(700px 420px at 0% 0%, rgba(255, 255, 255, 0.025), transparent 55%),
-    var(--bg);
+  background: var(--page-bg);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: 14.5px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: background-color 0.25s var(--ease), color 0.2s var(--ease);
 }
 
-/* Lop noise mo phu toan man (texture "san dau") */
+/* Texture rất nhẹ, chỉ ở theme tối */
 .grain {
   position: fixed;
   inset: 0;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.045;
+  opacity: var(--grain-opacity);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -98,38 +145,37 @@ a {
 
 /* ---- Typography ---- */
 h1 {
-  font-size: clamp(1.7rem, 1.25rem + 1.8vw, 2.5rem);
+  font-size: clamp(1.45rem, 1.15rem + 1.1vw, 1.9rem);
   font-weight: 680;
-  letter-spacing: -0.03em;
-  line-height: 1.04;
-  margin: 0 0 1.4rem;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  margin: 0 0 1.1rem;
   text-wrap: balance;
 }
 h2 {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.13em;
   color: var(--muted);
-  margin: 0 0 1.1rem;
+  margin: 0 0 0.9rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 h2::before {
   content: "";
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: var(--accent);
   border-radius: 2px;
-  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 h3 {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 640;
   letter-spacing: -0.01em;
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.55rem;
 }
 
 /* ---- Top bar (glass, sticky) ---- */
@@ -139,23 +185,32 @@ h3 {
   z-index: 50;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 0.85rem 1.25rem;
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
-  backdrop-filter: saturate(1.4) blur(14px);
+  gap: 1.4rem;
+  padding: 0.7rem 1.2rem;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: saturate(1.3) blur(14px);
   border-bottom: 1px solid var(--line);
 }
 .topbar .brand {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
   color: var(--ink);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.topbar .brand::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
-/* Nut co icon (header): icon + nhan, khong bao giờ wrap chu */
+/* Nút có icon (header): icon + nhãn, không bao giờ wrap chữ */
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -163,23 +218,20 @@ h3 {
   white-space: nowrap;
 }
 .icon-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   flex-shrink: 0;
-}
-.topbar .brand::first-letter {
-  color: var(--accent);
 }
 .topnav {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.3rem;
 }
 .topnav a {
   position: relative;
   color: var(--muted);
   font-weight: 500;
-  font-size: 0.92rem;
-  padding: 0.25rem 0;
+  font-size: 0.9rem;
+  padding: 0.2rem 0;
   transition: color 0.18s var(--ease);
 }
 .topnav a:hover {
@@ -193,7 +245,7 @@ h3 {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -0.85rem;
+  bottom: -0.72rem;
   height: 2px;
   background: var(--accent);
   border-radius: 2px;
@@ -203,7 +255,8 @@ h3 {
 }
 .topbar .who {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 /* ---- Bottom tab bar (mobile) ---- */
@@ -212,36 +265,35 @@ h3 {
 }
 
 .main {
-  max-width: 1080px;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 1.9rem 1.25rem 3rem;
+  padding: 1.7rem 1.2rem 3rem;
 }
 
-/* ===== Mobile-first: dien thoai la chinh (< 768px) ===== */
+/* ===== Mobile-first: điện thoại là chính (< 768px) ===== */
 @media (max-width: 767px) {
   .topnav,
   .topbar .who {
     display: none;
   }
 
-  /* Mobile: 2 nut header thanh nut icon vuong, an nhan chu cho gon */
   .topbar {
-    gap: 0.5rem;
-    padding: 0.7rem 0.95rem;
+    gap: 0.45rem;
+    padding: 0.6rem 0.9rem;
   }
   .icon-btn .btn-label {
     display: none;
   }
   .icon-btn {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     padding: 0;
     justify-content: center;
     border-radius: var(--r-sm);
   }
   .icon-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 19px;
+    height: 19px;
   }
 
   .tabbar {
@@ -251,9 +303,9 @@ h3 {
     display: flex;
     justify-content: space-around;
     gap: 0.25rem;
-    padding: 0.45rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom));
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: saturate(1.4) blur(16px);
+    padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: saturate(1.3) blur(16px);
     border-top: 1px solid var(--line);
   }
   .tabbar.hidden {
@@ -264,8 +316,8 @@ h3 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.2rem;
-    padding: 0.35rem 0;
+    gap: 0.18rem;
+    padding: 0.3rem 0;
     color: var(--muted);
     font-weight: 500;
     transition: color 0.18s var(--ease);
@@ -274,8 +326,8 @@ h3 {
     color: var(--accent);
   }
   .tabicon {
-    width: 23px;
-    height: 23px;
+    width: 22px;
+    height: 22px;
     display: block;
   }
   .tabicon svg {
@@ -283,12 +335,12 @@ h3 {
     height: 100%;
   }
   .tablabel {
-    font-size: 0.66rem;
+    font-size: 0.64rem;
     letter-spacing: 0.01em;
   }
 
   .main {
-    padding: 1.35rem 0.95rem 5.5rem;
+    padding: 1.2rem 0.9rem 5.2rem;
   }
 
   input,
@@ -296,7 +348,7 @@ h3 {
     font-size: 16px;
   }
 
-  /* Bang -> the xep chong */
+  /* Bảng -> thẻ xếp chồng */
   .table thead {
     display: none;
   }
@@ -310,8 +362,8 @@ h3 {
   .table tr {
     border: 1px solid var(--line);
     border-radius: var(--r);
-    padding: 0.35rem 0.9rem;
-    margin-bottom: 0.7rem;
+    padding: 0.3rem 0.85rem;
+    margin-bottom: 0.6rem;
     background: var(--surface-2);
   }
   .table td {
@@ -319,7 +371,7 @@ h3 {
     justify-content: space-between;
     align-items: baseline;
     gap: 1rem;
-    padding: 0.4rem 0;
+    padding: 0.38rem 0;
     border-bottom: 1px solid var(--line-soft);
     text-align: right;
   }
@@ -329,9 +381,9 @@ h3 {
   .table td::before {
     content: attr(data-label);
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
     color: var(--muted);
     text-align: left;
     flex-shrink: 0;
@@ -350,23 +402,24 @@ h3 {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  padding: 1.5rem 1.6rem;
-  margin-bottom: 1.25rem;
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1rem;
   box-shadow: var(--shadow-sm);
 }
 
 /* ---- Grid ---- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 1.1rem;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 0.85rem;
 }
 
-/* ---- Stat tiles (scoreboard) ---- */
+/* ---- Stat tiles ---- */
 .stat {
   position: relative;
   overflow: hidden;
   margin-bottom: 0;
+  padding: 1.05rem 1.15rem;
   transition: transform 0.22s var(--ease), border-color 0.22s var(--ease),
     box-shadow 0.22s var(--ease);
 }
@@ -380,7 +433,7 @@ h3 {
   transition: opacity 0.22s var(--ease);
 }
 .stat:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--accent-line);
   box-shadow: var(--shadow);
 }
@@ -390,49 +443,40 @@ h3 {
 .stat .label {
   font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.13em;
-  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  font-size: 0.65rem;
   color: var(--muted);
 }
 .stat .value {
   font-family: var(--font-mono);
-  font-size: 1.95rem;
+  font-size: 1.55rem;
   font-weight: 640;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-  margin-top: 0.55rem;
+  margin-top: 0.45rem;
   color: var(--ink);
   line-height: 1.1;
-}
-.stat .value::after {
-  content: "";
-  display: block;
-  width: 28px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--accent);
-  margin-top: 0.85rem;
 }
 
 /* ---- Table ---- */
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.92rem;
+  font-size: 0.875rem;
 }
 .table th,
 .table td {
   text-align: left;
-  padding: 0.72rem 0.8rem;
+  padding: 0.6rem 0.75rem;
   border-bottom: 1px solid var(--line-soft);
 }
 .table thead th {
   font-family: var(--font-mono);
   color: var(--muted);
   font-weight: 500;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   border-bottom-color: var(--line);
 }
 .table tbody tr {
@@ -453,20 +497,18 @@ h3 {
 /* ---- Form ---- */
 label {
   display: block;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  margin-bottom: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 550;
+  color: var(--ink-soft);
+  margin-bottom: 0.4rem;
 }
 input,
 select {
   width: 100%;
-  padding: 0.62rem 0.78rem;
+  padding: 0.55rem 0.72rem;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-family: var(--font-sans);
   background: var(--bg-tint);
   color: var(--ink);
@@ -484,7 +526,7 @@ select:focus {
   box-shadow: 0 0 0 3px var(--accent-tint);
 }
 .field {
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
 }
 
 /* ---- Buttons ---- */
@@ -492,15 +534,15 @@ button {
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: var(--r-sm);
-  padding: 0.62rem 1.2rem;
-  font-size: 0.9rem;
-  font-weight: 640;
+  padding: 0.55rem 1.05rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   font-family: var(--font-sans);
   letter-spacing: -0.005em;
   background: var(--accent);
   color: var(--on-accent);
   transition: background 0.18s var(--ease), transform 0.08s var(--ease),
-    box-shadow 0.18s var(--ease);
+    box-shadow 0.18s var(--ease), border-color 0.18s var(--ease);
 }
 button:hover {
   background: var(--accent-deep);
@@ -521,14 +563,15 @@ button.ghost {
 button.ghost:hover {
   background: var(--surface-2);
   border-color: var(--muted);
+  color: var(--ink);
 }
 
 /* ---- Helpers ---- */
 .error {
   color: var(--danger);
-  font-size: 0.88rem;
-  margin: 0.6rem 0;
-  padding-left: 0.75rem;
+  font-size: 0.85rem;
+  margin: 0.55rem 0;
+  padding-left: 0.7rem;
   border-left: 2px solid var(--danger);
 }
 .muted {
@@ -538,10 +581,10 @@ button.ghost:hover {
   text-align: center;
 }
 
-/* Thong bao rong trong bang (vd "Chua co buoi choi nao") -> can giua */
+/* Thông báo rỗng trong bảng -> căn giữa */
 .table td.table-empty {
   text-align: center;
-  padding: 1.6rem 0.8rem;
+  padding: 1.5rem 0.8rem;
   color: var(--muted);
 }
 @media (max-width: 767px) {
@@ -556,14 +599,14 @@ button.ghost:hover {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.18rem 0.55rem;
+  gap: 0.38rem;
+  padding: 0.15rem 0.5rem;
   border-radius: var(--r-pill);
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 .badge::before {
   content: "";
@@ -573,15 +616,15 @@ button.ghost:hover {
   background: currentColor;
 }
 .badge.active {
-  background: var(--accent-tint);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--pos) 16%, transparent);
+  color: var(--pos);
 }
 .badge.inactive {
   background: var(--surface-3);
   color: var(--muted);
 }
 
-/* ===== Man dang nhap (can giua, full man hinh, uu tien mobile) ===== */
+/* ===== Màn đăng nhập ===== */
 .auth {
   min-height: 100dvh;
   display: flex;
@@ -591,48 +634,61 @@ button.ghost:hover {
 }
 .auth-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 372px;
   margin: 0;
-  padding: 1.9rem 1.7rem;
+  padding: 1.8rem 1.6rem;
 }
 .auth-brand {
-  display: block;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
   margin-bottom: 1rem;
 }
-.auth-brand::first-letter {
-  color: var(--accent);
+.auth-brand::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 .auth-version {
-  margin: 1.4rem 0 0;
+  margin: 1.3rem 0 0;
   text-align: center;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
   color: var(--muted);
 }
 
-/* ===== Phan trang ===== */
+/* Nút đổi theme nổi ở góc màn đăng nhập */
+.auth-theme {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+}
+
+/* ===== Phân trang ===== */
 .pager {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
   border-top: 1px solid var(--line-soft);
 }
 .pager-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
   white-space: nowrap;
 }
 .pager .pginfo {
@@ -640,34 +696,33 @@ button.ghost:hover {
   text-align: center;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--muted);
 }
 
 @media (max-width: 767px) {
-  /* Mobile: gon lai, info chi con x/y */
   .pager .pg-total {
     display: none;
   }
   .pager-btn {
-    padding: 0.55rem 0.9rem;
+    padding: 0.5rem 0.85rem;
   }
 }
 
-/* ===== Page header: tieu de + nut hanh dong ===== */
+/* ===== Page header: tiêu đề + nút hành động ===== */
 .page-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.25rem;
 }
 .page-head h1 {
   margin: 0;
 }
 
-/* ===== Dialog (them / sua) ===== */
+/* ===== Dialog (thêm / sửa) ===== */
 .dlg-overlay {
   position: fixed;
   inset: 0;
@@ -676,12 +731,12 @@ button.ghost:hover {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: rgba(4, 6, 9, 0.62);
+  background: color-mix(in srgb, var(--bg) 35%, rgba(4, 6, 9, 0.55));
   backdrop-filter: blur(5px);
 }
 .dlg {
   width: 100%;
-  max-width: 560px;
+  max-width: 540px;
   max-height: calc(100dvh - 3rem);
   display: flex;
   flex-direction: column;
@@ -696,25 +751,25 @@ button.ghost:hover {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.05rem 1.3rem;
+  padding: 0.95rem 1.2rem;
   border-bottom: 1px solid var(--line);
   flex-shrink: 0;
 }
 .dlg-title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 680;
   letter-spacing: -0.01em;
   color: var(--ink);
 }
 .dlg-close {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border-radius: var(--r-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   background: transparent;
   color: var(--muted);
   border: 1px solid var(--line);
@@ -724,10 +779,9 @@ button.ghost:hover {
   color: var(--ink);
 }
 .dlg-body {
-  padding: 1.3rem;
+  padding: 1.2rem;
   overflow-y: auto;
 }
-/* Form trong dialog: nut submit chiem het hang cho de bam */
 .dlg-body > form > button[type="submit"],
 .dlg-body .actions {
   width: 100%;
@@ -737,7 +791,6 @@ button.ghost:hover {
 }
 
 @media (max-width: 767px) {
-  /* Bottom-sheet: truot len tu day, vua tam tay */
   .dlg-overlay {
     align-items: flex-end;
     padding: 0;
@@ -776,9 +829,7 @@ button.ghost:hover {
   }
 }
 
-/* ===== UX components: nhap nhanh, cham de tren mobile ===== */
-
-/* Hang field xep ngang, tu xuong cot tren mobile */
+/* ===== UX components: nhập nhanh, chạm dễ trên mobile ===== */
 .row {
   display: flex;
   flex-wrap: wrap;
@@ -786,7 +837,7 @@ button.ghost:hover {
   align-items: flex-end;
 }
 
-/* Segmented control (vd: vai tro) */
+/* Segmented control */
 .seg {
   display: inline-flex;
   gap: 3px;
@@ -799,9 +850,9 @@ button.ghost:hover {
   background: transparent;
   color: var(--muted);
   border: none;
-  padding: 0.45rem 0.95rem;
+  padding: 0.42rem 0.9rem;
   border-radius: calc(var(--r) - 4px);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
 }
 .seg button:hover {
@@ -817,7 +868,7 @@ button.ghost:hover {
   color: var(--on-accent);
 }
 
-/* Stepper +/- cho so luong */
+/* Stepper +/- */
 .stepper {
   display: inline-flex;
   align-items: stretch;
@@ -830,10 +881,10 @@ button.ghost:hover {
   background: transparent;
   color: var(--ink);
   border: none;
-  width: 42px;
-  min-height: 44px;
+  width: 40px;
+  min-height: 42px;
   padding: 0;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   line-height: 1;
   font-weight: 500;
   border-radius: 0;
@@ -845,14 +896,14 @@ button.ghost:hover {
   opacity: 0.35;
 }
 .stepper input {
-  width: 46px;
+  width: 44px;
   text-align: center;
   border: none;
   border-radius: 0;
   background: transparent;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 1rem;
+  font-size: 0.95rem;
   padding: 0;
   -moz-appearance: textfield;
   appearance: textfield;
@@ -867,19 +918,19 @@ button.ghost:hover {
   background: transparent;
 }
 
-/* Chips: nhom nut bam nhanh */
+/* Chips */
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 .chip {
   background: var(--surface-2);
   color: var(--ink-soft);
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  padding: 0.5rem 0.9rem;
-  font-size: 0.86rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
   font-family: var(--font-sans);
   transition: background 0.16s var(--ease), border-color 0.16s var(--ease),
@@ -897,38 +948,37 @@ button.ghost:hover {
   border-color: var(--accent);
   color: var(--on-accent);
 }
-/* Dem so slot tren chip nguoi da chon */
 .chip .count {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  margin-left: 0.45rem;
-  padding-left: 0.45rem;
+  margin-left: 0.4rem;
+  padding-left: 0.4rem;
   border-left: 1px solid color-mix(in srgb, var(--on-accent) 30%, transparent);
   opacity: 0.85;
 }
 
-/* Hang nguoi da chon: ten + stepper */
+/* Hàng người đã chọn */
 .pick-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.6rem 0.85rem;
+  padding: 0.55rem 0.8rem;
   border: 1px solid var(--line-soft);
   border-radius: var(--r);
   background: var(--surface-2);
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.5rem;
 }
 .pick-row .who-name {
   font-weight: 600;
 }
 
-/* Khung tom tat (preview / tinh thu) */
+/* Khung tóm tắt */
 .summary {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.4rem;
-  padding: 0.9rem 1.1rem;
+  gap: 1.3rem;
+  padding: 0.85rem 1rem;
   border: 1px solid var(--accent-line);
   border-radius: var(--r);
   background: var(--accent-tint);
@@ -937,19 +987,19 @@ button.ghost:hover {
 .summary .item {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.12rem;
 }
 .summary .item .k {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.09em;
   color: var(--muted);
 }
 .summary .item .v {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 640;
   color: var(--ink);
 }
@@ -957,11 +1007,11 @@ button.ghost:hover {
   color: var(--accent);
 }
 
-/* Thanh hanh dong dinh duoi form tren mobile */
+/* Thanh hành động */
 .actions {
   display: flex;
   gap: 0.6rem;
-  margin-top: 1.1rem;
+  margin-top: 1rem;
 }
 .actions .grow {
   flex: 1;
@@ -973,12 +1023,11 @@ button.ghost:hover {
   }
 }
 
-/* ===== Motion: vao man muot, ton trong prefers-reduced-motion ===== */
+/* ===== Motion ===== */
 @media (prefers-reduced-motion: no-preference) {
   .card {
     animation: rise 0.5s var(--ease) both;
   }
-  /* So le nhe cho cac the trong cung mot grid (toi da 8 the) */
   .grid > .card:nth-child(1) { animation-delay: 0.02s; }
   .grid > .card:nth-child(2) { animation-delay: 0.07s; }
   .grid > .card:nth-child(3) { animation-delay: 0.12s; }
@@ -991,11 +1040,113 @@ button.ghost:hover {
   @keyframes rise {
     from {
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+}
+
+/* ===== Danh sach xo gon: bam dong de hien chi tiet ===== */
+.xlist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.xrow {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  background: var(--surface-2);
+  overflow: hidden;
+  transition: border-color 0.15s var(--ease);
+}
+.xrow.open {
+  border-color: var(--accent-line);
+}
+.xrow-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 0.85rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  cursor: pointer;
+}
+.xrow-head:hover {
+  background: var(--surface-3);
+}
+.xrow-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+.xrow-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.xrow-sub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.xrow-amount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 640;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+.xrow-chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: transform 0.2s var(--ease);
+}
+.xrow.open .xrow-chevron {
+  transform: rotate(180deg);
+}
+.xrow-detail {
+  padding: 0.7rem 0.85rem 0.8rem;
+  display: grid;
+  gap: 0.45rem;
+  border-top: 1px solid var(--line-soft);
+}
+.xrow-detail .drow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+.xrow-detail .k {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.xrow-detail .v {
+  text-align: right;
+  font-size: 0.85rem;
+  word-break: break-word;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .xrow-detail {
+    animation: xreveal 0.18s var(--ease);
+  }
+  @keyframes xreveal {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 }

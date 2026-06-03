@@ -23,8 +23,18 @@ export default function SessionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const PAGE_SIZE = 10;
+
+  function toggleRow(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const memberName = useMemo(() => {
     const map = new Map<string, string>();
@@ -86,40 +96,59 @@ export default function SessionsPage() {
         {error && <p className="error">{error}</p>}
         {loading ? (
           <p className="muted center">Đang tải...</p>
+        ) : sessions.length === 0 ? (
+          <p className="muted center" style={{ padding: "1.2rem 0" }}>Chưa có buổi chơi nào.</p>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Ngày</th>
-                <th className="right">Tổng chi</th>
-                <th className="right">Mỗi slot</th>
-                <th>Người tham gia</th>
-                <th>Ghi chú</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pageItems.map((s) => (
-                <tr key={s.id}>
-                  <td data-label="Ngày" className="muted">{formatDate(s.played_at)}</td>
-                  <td data-label="Tổng chi" className="right">{formatMoney(s.total_cost)}</td>
-                  <td data-label="Mỗi slot" className="right">{formatMoney(s.cost_per_slot)}</td>
-                  <td data-label="Người tham gia">
-                    {s.participants
-                      .map((p) => `${memberName.get(p.member_id) ?? "?"} (${p.slot_count})`)
-                      .join(", ")}
-                  </td>
-                  <td data-label="Ghi chú" className="muted">{s.note}</td>
-                </tr>
-              ))}
-              {sessions.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="table-empty">
-                    Chưa có buổi chơi nào.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <div className="xlist">
+            {pageItems.map((s) => {
+              const open = expanded.has(s.id);
+              return (
+                <div className={`xrow${open ? " open" : ""}`} key={s.id}>
+                  <button
+                    type="button"
+                    className="xrow-head"
+                    onClick={() => toggleRow(s.id)}
+                    aria-expanded={open}
+                  >
+                    <span className="xrow-main">
+                      <span className="xrow-title">{formatDate(s.played_at)}</span>
+                      <span className="xrow-sub">
+                        {s.participants.length} người · {s.total_slots} slot
+                      </span>
+                    </span>
+                    <span className="xrow-amount">{formatMoney(s.total_cost)}</span>
+                    <Chevron />
+                  </button>
+                  {open && (
+                    <div className="xrow-detail">
+                      <div className="drow">
+                        <span className="k">Mỗi slot</span>
+                        <span className="v">{formatMoney(s.cost_per_slot)}</span>
+                      </div>
+                      <div className="drow">
+                        <span className="k">Người tham gia</span>
+                        <span className="v">
+                          {s.participants
+                            .map((p) => `${memberName.get(p.member_id) ?? "?"} (${p.slot_count})`)
+                            .join(", ")}
+                        </span>
+                      </div>
+                      <div className="drow">
+                        <span className="k">Dư làm tròn</span>
+                        <span className="v">{formatMoney(s.surplus_amount)}</span>
+                      </div>
+                      {s.note && (
+                        <div className="drow">
+                          <span className="k">Ghi chú</span>
+                          <span className="v">{s.note}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
 
         {!loading && totalPages > 1 && (
@@ -400,5 +429,23 @@ function CreateSessionForm({
         </button>
       </div>
     </div>
+  );
+}
+
+// Mui ten xo (xoay khi mo)
+function Chevron() {
+  return (
+    <svg
+      className="xrow-chevron"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
   );
 }
