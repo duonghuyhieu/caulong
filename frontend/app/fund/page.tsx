@@ -14,6 +14,8 @@ export default function FundPage() {
 
   const [members, setMembers] = useState<Member[]>([]);
   const [transactions, setTransactions] = useState<FundTransaction[]>([]);
+  // scope "mine" = chi giao dich cua minh (mac dinh); "all" = ca quy (chung).
+  const [scope, setScope] = useState<"mine" | "all">("mine");
   const [filterMemberId, setFilterMemberId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,12 +35,17 @@ export default function FundPage() {
   const safePage = Math.min(page, totalPages);
   const pageItems = transactions.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  async function loadTransactions(memberId: string) {
+  async function loadTransactions(memberId?: string) {
     try {
       setTransactions(await fundApi.transactions(memberId || undefined));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Lỗi tải giao dịch");
     }
+  }
+
+  // member_id dung de query theo scope hien tai.
+  function queryMemberId(s: "mine" | "all", fid: string): string | undefined {
+    return s === "mine" ? currentUser?.id : fid || undefined;
   }
 
   // Tai du lieu lan dau (mount). Dinh nghia trong effect + dung setter truc tiep
@@ -48,7 +55,8 @@ export default function FundPage() {
       try {
         setMembers(await membersApi.list());
         setSummary(await fundApi.summary());
-        setTransactions(await fundApi.transactions(undefined));
+        // mac dinh: chi xem giao dich cua minh
+        setTransactions(await fundApi.transactions(currentUser?.id));
       } catch (err) {
         setError(err instanceof ApiError ? err.message : "Lỗi tải dữ liệu");
       } finally {
@@ -56,20 +64,28 @@ export default function FundPage() {
       }
     }
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function changeScope(next: "mine" | "all") {
+    setScope(next);
+    setFilterMemberId("");
+    setPage(1);
+    loadTransactions(queryMemberId(next, ""));
+  }
 
   function onFilterChange(memberId: string) {
     setFilterMemberId(memberId);
     setPage(1);
-    loadTransactions(memberId);
+    loadTransactions(memberId || undefined);
   }
 
-  // Sau khi nộp/điều chỉnh: tải lại giao dịch (theo filter hiện tại) + members (số dư đổi) + summary.
+  // Sau khi nộp/điều chỉnh: tải lại giao dịch (theo scope/filter hiện tại) + members + summary.
   async function refreshAfterChange() {
     setMembers(await membersApi.list());
     setSummary(await fundApi.summary());
     setPage(1);
-    await loadTransactions(filterMemberId);
+    await loadTransactions(queryMemberId(scope, filterMemberId));
   }
 
   // Sau khi nop/dieu chinh xong: dong dialog + tai lai.
@@ -99,20 +115,40 @@ export default function FundPage() {
 
       <div className="card">
         <h2>Lịch sử giao dịch</h2>
-        <div className="field" style={{ maxWidth: 280 }}>
-          <label htmlFor="filter">Lọc theo thành viên</label>
-          <select
-            id="filter"
-            value={filterMemberId}
-            onChange={(e) => onFilterChange(e.target.value)}
-          >
-            <option value="">Tất cả</option>
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.8rem",
+            flexWrap: "wrap",
+            alignItems: "flex-end",
+            marginBottom: "1rem",
+          }}
+        >
+          <div>
+            <label>Phạm vi</label>
+            <div className="seg">
+              <button type="button" aria-pressed={scope === "mine"} onClick={() => changeScope("mine")}>
+                Riêng
+              </button>
+              <button type="button" aria-pressed={scope === "all"} onClick={() => changeScope("all")}>
+                Chung
+              </button>
+            </div>
+          </div>
+
+          {scope === "all" && (
+            <div className="field" style={{ marginBottom: 0, minWidth: 200, flex: 1, maxWidth: 280 }}>
+              <label htmlFor="filter">Lọc theo thành viên</label>
+              <select id="filter" value={filterMemberId} onChange={(e) => onFilterChange(e.target.value)}>
+                <option value="">Tất cả</option>
+                {members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {error && <p className="error">{error}</p>}
