@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -29,6 +30,9 @@ export default function LoginPage() {
 
   return (
     <div className="auth">
+      <div className="auth-theme">
+        <ThemeToggle />
+      </div>
       <div className="card auth-card">
         <span className="auth-brand">Quỹ Cầu Lông</span>
         <h1>Đăng nhập</h1>

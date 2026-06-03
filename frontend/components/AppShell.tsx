@@ -11,6 +11,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 import { authApi, ApiError } from "@/lib/api";
 import { Dialog } from "@/components/Dialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 // Player XEM duoc moi man (chi doc). Cac nut them/sua/nop/dieu chinh
 // deu da gate theo isTreasurer ben trong tung trang.
@@ -124,6 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span className="who">
           {member.name} · {isTreasurer ? "Thủ quỹ" : "Người chơi"}
         </span>
+        <ThemeToggle />
         <button
           className="ghost icon-btn"
           onClick={() => setPwOpen(true)}
