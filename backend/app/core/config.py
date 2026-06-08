@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 1440
     low_balance_threshold: int = 50000
     money_rounding_unit: int = 1000
-
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     @property

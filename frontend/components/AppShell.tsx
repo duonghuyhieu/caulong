@@ -10,6 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 import { authApi, ApiError } from "@/lib/api";
+import { AIBubble } from "@/components/AIBubble";
 import { Dialog } from "@/components/Dialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -165,6 +166,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Dialog open={pwOpen} onClose={() => setPwOpen(false)} title="Đổi mật khẩu">
         <ChangePasswordForm onDone={() => setPwOpen(false)} />
       </Dialog>
+      <AIBubble />
     </>
   );
 }

@@ -2,6 +2,8 @@
 // Token luu o localStorage (xem lib/auth.tsx). Moi loi tra ve throw ApiError.
 
 import type {
+  AIChatInput,
+  AIChatResponse,
   AdjustmentInput,
   CommonFundExpenseInput,
   DepositInput,
@@ -131,4 +133,10 @@ export const playSessionsApi = {
     request<PlaySessionPreview>("/play-sessions/preview", { method: "POST", body: input }),
   create: (input: PlaySessionCreateInput) =>
     request<PlaySession>("/play-sessions", { method: "POST", body: input }),
+};
+
+// ---- AI ----
+export const aiApi = {
+  chat: (input: AIChatInput) =>
+    request<AIChatResponse>("/ai/chat", { method: "POST", body: input }),
 };

@@ -140,3 +140,17 @@ export interface TokenResponse {
   access_token: string;
   token_type: string;
 }
+
+export interface AIChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface AIChatInput {
+  message: string;
+  history: AIChatMessage[];
+}
+
+export interface AIChatResponse {
+  message: string;
+}
