@@ -71,7 +71,7 @@ export default function LoginPage() {
             {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
-        <p className="auth-version">Phiên bản 1.0.0</p>
+        <p className="auth-version">Phiên bản 1.1.0</p>
       </div>
     </div>
   );
