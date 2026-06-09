@@ -5,7 +5,7 @@ import { aiApi, ApiError } from "@/lib/api";
 import type { AIChatMessage } from "@/lib/types";
 
 const QUICK_QUESTIONS = [
-  "Quỹ còn bao nhiêu?",
+  "Quỹ Teppy còn bao nhiêu?",
   "Tuần rồi chơi ngày nào?",
   "Ai sắp hết quỹ?",
 ];
@@ -15,7 +15,7 @@ export function AIBubble() {
   const [messages, setMessages] = useState<AIChatMessage[]>([
     {
       role: "assistant",
-      content: "Bạn hỏi mình về quỹ, lịch chơi, số dư hoặc giao dịch nhé.",
+      content: "Teppy đây. Bạn hỏi mình về quỹ, lịch chơi, số dư hoặc giao dịch nhé.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -53,7 +53,7 @@ export function AIBubble() {
         { role: "assistant", content: response.message },
       ]);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Không hỏi AI được");
+      setError(err instanceof ApiError ? err.message : "Không hỏi Teppy được");
       setMessages(nextMessages);
     } finally {
       setLoading(false);
@@ -63,17 +63,17 @@ export function AIBubble() {
   return (
     <div className="ai-widget">
       {open && (
-        <section className="ai-panel" aria-label="Trợ lý AI">
+        <section className="ai-panel" aria-label="Trợ lý quỹ Teppy">
           <div className="ai-head">
             <div>
-              <div className="ai-title">Trợ lý quỹ</div>
-              <div className="ai-sub">Chỉ hỏi đáp, không ghi dữ liệu</div>
+              <div className="ai-title">Teppy</div>
+              <div className="ai-sub">Trợ lý quỹ, chỉ hỏi đáp</div>
             </div>
             <button
               type="button"
               className="ai-close"
               onClick={() => setOpen(false)}
-              aria-label="Đóng trợ lý AI"
+              aria-label="Đóng trợ lý quỹ Teppy"
             >
               x
             </button>
@@ -88,7 +88,14 @@ export function AIBubble() {
                 {message.content}
               </div>
             ))}
-            {loading && <div className="ai-message assistant muted">Đang trả lời...</div>}
+            {loading && (
+              <div className="ai-message assistant ai-thinking" aria-live="polite">
+                <span className="ai-thinking-text">Teppy đang xem quỹ</span>
+                <span className="ai-dot" />
+                <span className="ai-dot" />
+                <span className="ai-dot" />
+              </div>
+            )}
           </div>
 
           {messages.length === 1 && (
@@ -118,7 +125,7 @@ export function AIBubble() {
             <input
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Hỏi về quỹ hoặc lịch chơi..."
+              placeholder="Hỏi Teppy về quỹ hoặc lịch chơi..."
               disabled={loading}
             />
             <button type="submit" disabled={loading || !input.trim()}>
@@ -132,9 +139,9 @@ export function AIBubble() {
         type="button"
         className="ai-fab"
         onClick={() => setOpen((value) => !value)}
-        aria-label={open ? "Đóng trợ lý AI" : "Mở trợ lý AI"}
+        aria-label={open ? "Đóng trợ lý quỹ Teppy" : "Mở trợ lý quỹ Teppy"}
       >
-        AI
+        T
       </button>
     </div>
   );
