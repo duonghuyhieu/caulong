@@ -33,6 +33,8 @@ services:
       DATABASE_URL: postgresql+psycopg://badminton:${POSTGRES_PASSWORD}@caulong-postgres:5432/badminton_fund
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY chua duoc set trong .env}
       BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-https://caulong.huyhieu.online}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?OPENAI_API_KEY chua duoc set trong .env}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
     depends_on:
       postgres:
         condition: service_healthy
