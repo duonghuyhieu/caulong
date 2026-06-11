@@ -5,7 +5,10 @@ import type {
   AIChatInput,
   AIChatResponse,
   AdjustmentInput,
+  CategoryExpenseInput,
   CommonFundExpenseInput,
+  CostByCategoryReport,
+  CostCategory,
   DepositInput,
   FundSummary,
   FundTransaction,
@@ -123,16 +126,42 @@ export const fundApi = {
     request<FundTransaction>("/fund/adjustments", { method: "POST", body: input }),
   spendCommon: (input: CommonFundExpenseInput) =>
     request<FundTransaction>("/fund/common-expense", { method: "POST", body: input }),
+  spendCategory: (input: CategoryExpenseInput) =>
+    request<FundTransaction>("/fund/category-expense", { method: "POST", body: input }),
 };
 
 // ---- Play sessions ----
 export const playSessionsApi = {
   list: () => request<PlaySession[]>("/play-sessions"),
   get: (id: string) => request<PlaySession>(`/play-sessions/${id}`),
+  costCategories: () => request<string[]>("/play-sessions/cost-categories"),
   preview: (input: PlaySessionCreateInput) =>
     request<PlaySessionPreview>("/play-sessions/preview", { method: "POST", body: input }),
   create: (input: PlaySessionCreateInput) =>
     request<PlaySession>("/play-sessions", { method: "POST", body: input }),
+};
+
+// ---- Cost categories (CRUD) ----
+export const categoriesApi = {
+  list: () => request<CostCategory[]>("/cost-categories"),
+  create: (name: string) =>
+    request<CostCategory>("/cost-categories", { method: "POST", body: { name } }),
+  update: (id: string, name: string) =>
+    request<CostCategory>(`/cost-categories/${id}`, { method: "PUT", body: { name } }),
+  remove: (id: string) =>
+    request<void>(`/cost-categories/${id}`, { method: "DELETE" }),
+};
+
+// ---- Reports ----
+export const reportsApi = {
+  // Tong chi tieu theo hang muc. from/to la ISO datetime (tuy chon).
+  costByCategory: (from?: string, to?: string) => {
+    const params = new URLSearchParams();
+    if (from) params.set("date_from", from);
+    if (to) params.set("date_to", to);
+    const qs = params.toString();
+    return request<CostByCategoryReport>(`/reports/cost-by-category${qs ? `?${qs}` : ""}`);
+  },
 };
 
 // ---- AI ----

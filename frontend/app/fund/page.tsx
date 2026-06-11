@@ -5,6 +5,7 @@ import { fundApi, membersApi, ApiError } from "@/lib/api";
 import { formatMoney, formatDate, formatDateTime, TRANSACTION_TYPE_LABEL } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { Dialog } from "@/components/Dialog";
+import { MoneyInput } from "@/components/MoneyInput";
 import { Pager } from "@/components/Pager";
 import type { FundSummary, FundTransaction, Member } from "@/lib/types";
 
@@ -205,6 +206,12 @@ export default function FundPage() {
                           </span>
                         </div>
                       )}
+                      {t.category && (
+                        <div className="drow">
+                          <span className="k">Hạng mục</span>
+                          <span className="v">{t.category}</span>
+                        </div>
+                      )}
                       <div className="drow">
                         <span className="k">Số dư sau</span>
                         <span className="v">
@@ -301,14 +308,10 @@ function CommonExpenseForm({ balance, onDone }: { balance: number; onDone: () =>
 
       <div className="field">
         <label>Số tiền chi (đồng)</label>
-        <input
-          type="number"
-          inputMode="numeric"
-          min={1}
-          max={balance}
-          placeholder="vd: 300000"
+        <MoneyInput
+          placeholder="vd: 300.000"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={setAmount}
           required
           autoFocus
         />
@@ -398,13 +401,10 @@ function DepositForm({ members, onDone }: { members: Member[]; onDone: () => voi
         </div>
         <div className="field">
           <label>Số tiền (đồng)</label>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={1}
-            placeholder="vd: 200000"
+          <MoneyInput
+            placeholder="vd: 200.000"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={setAmount}
             required
           />
           <div className="chips" style={{ marginTop: "0.5rem" }}>
@@ -478,10 +478,10 @@ function AdjustForm({ members, onDone }: { members: Member[]; onDone: () => void
         </div>
         <div className="field">
           <label>Số tiền (âm = trừ, dương = cộng)</label>
-          <input
-            type="number"
+          <MoneyInput
+            allowNegative
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={setAmount}
             required
           />
         </div>

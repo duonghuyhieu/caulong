@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 1440
     low_balance_threshold: int = 50000
     money_rounding_unit: int = 1000
+    # Danh sach hang muc chi phi cho moi buoi choi (phay ngan cach). Hien chi co
+    # cau long; sau nay co the mo rong / cho chinh runtime.
+    cost_categories: str = "Tiền sân,Tiền cầu,Tiền nước"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
@@ -19,6 +22,10 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.backend_cors_origins.split(",") if origin.strip()]
+
+    @property
+    def cost_category_list(self) -> list[str]:
+        return [name.strip() for name in self.cost_categories.split(",") if name.strip()]
 
 
 @lru_cache

@@ -5,8 +5,13 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.config import get_settings
 from app.models.fund_transaction import FundTransaction
 from app.models.member import Member
-from app.models.play_session import PlaySession, PlaySessionParticipant
+from app.models.play_session import (
+    PlaySession,
+    PlaySessionCostItem,
+    PlaySessionParticipant,
+)
 from app.schemas.play_session import (
+    CostItemRead,
     PlaySessionCreate,
     PlaySessionParticipantPreview,
     PlaySessionPreview,
@@ -36,6 +41,12 @@ def preview_play_session(db: Session, payload: PlaySessionCreate) -> PlaySession
     if len(members) != len(member_ids):
         raise HTTPException(status_code=400, detail="Invalid or inactive member in participants")
 
+    # Tong chi phi = tong cac dong hang muc. Toan chia tien van dua tren tong nay.
+    total_cost = sum(item.amount for item in payload.cost_items)
+
+    if total_cost <= 0:
+        raise HTTPException(status_code=400, detail="Total cost must be greater than 0")
+
     settings = get_settings()
     total_slots = sum(participant.slot_count for participant in payload.participants)
 
@@ -43,9 +54,9 @@ def preview_play_session(db: Session, payload: PlaySessionCreate) -> PlaySession
         raise HTTPException(status_code=400, detail="Total slots must be greater than 0")
 
     cost_per_slot = round_up_money(
-        payload.total_cost // total_slots
-        if payload.total_cost % total_slots == 0
-        else payload.total_cost // total_slots + 1,
+        total_cost // total_slots
+        if total_cost % total_slots == 0
+        else total_cost // total_slots + 1,
         settings.money_rounding_unit,
     )
 
@@ -61,12 +72,16 @@ def preview_play_session(db: Session, payload: PlaySessionCreate) -> PlaySession
     total_charged = sum(participant.charged_amount for participant in participant_previews)
 
     return PlaySessionPreview(
-        total_cost=payload.total_cost,
+        total_cost=total_cost,
         total_slots=total_slots,
         cost_per_slot=cost_per_slot,
         total_charged=total_charged,
-        surplus_amount=total_charged - payload.total_cost,
+        surplus_amount=total_charged - total_cost,
         participants=participant_previews,
+        cost_items=[
+            CostItemRead(category=item.category, amount=item.amount)
+            for item in payload.cost_items
+        ],
     )
 
 
@@ -79,7 +94,7 @@ def create_play_session(
 
     session = PlaySession(
         played_at=payload.played_at,
-        total_cost=payload.total_cost,
+        total_cost=preview.total_cost,
         total_slots=preview.total_slots,
         cost_per_slot=preview.cost_per_slot,
         total_charged=preview.total_charged,
@@ -91,6 +106,16 @@ def create_play_session(
 
     db.add(session)
     db.flush()
+
+    # Luu tung dong chi phi de bao cao "tien di dau".
+    for item in payload.cost_items:
+        db.add(
+            PlaySessionCostItem(
+                play_session_id=session.id,
+                category=item.category,
+                amount=item.amount,
+            )
+        )
 
     members_by_id = {
         member.id: member
@@ -124,18 +149,9 @@ def create_play_session(
             )
         )
 
-    if preview.surplus_amount > 0:
-        db.add(
-            FundTransaction(
-                member_id=None,
-                play_session_id=session.id,
-                type="rounding_surplus",
-                amount=preview.surplus_amount,
-                balance_after=None,
-                description=f"Du quy do lam tron buoi choi {payload.played_at.date().isoformat()}",
-                created_by_member_id=created_by.id,
-            )
-        )
+    # Buoi choi chi tru so du nguoi choi + cong vao "da dung" cua tung hang muc
+    # (qua cost_items). KHONG dong vao quy chung. Tien vendor da duoc tra truoc
+    # qua "Tach quy"; buoi choi chi tieu thu tu cac "vi" hang muc da ung.
 
     db.commit()
 
@@ -146,7 +162,10 @@ def list_play_sessions(db: Session) -> list[PlaySession]:
     return list(
         db.scalars(
             select(PlaySession)
-            .options(selectinload(PlaySession.participants))
+            .options(
+            selectinload(PlaySession.participants),
+            selectinload(PlaySession.cost_items),
+        )
             .order_by(PlaySession.played_at.desc())
         ).all()
     )
@@ -155,7 +174,10 @@ def list_play_sessions(db: Session) -> list[PlaySession]:
 def get_play_session(db: Session, play_session_id: str) -> PlaySession:
     session = db.scalar(
         select(PlaySession)
-        .options(selectinload(PlaySession.participants))
+        .options(
+            selectinload(PlaySession.participants),
+            selectinload(PlaySession.cost_items),
+        )
         .where(PlaySession.id == play_session_id)
     )
 

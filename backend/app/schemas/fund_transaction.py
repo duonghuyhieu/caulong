@@ -11,6 +11,9 @@ FundTransactionType = Literal[
     "manual_adjustment",
     "session_refund",
     "common_fund_expense",
+    "session_payment",
+    "session_expense",
+    "category_expense",
 ]
 
 
@@ -25,6 +28,23 @@ class CommonFundExpenseCreate(BaseModel):
 
     amount: int = Field(gt=0)
     description: str = Field(min_length=1, max_length=500)
+
+
+class CategoryExpenseCreate(BaseModel):
+    """Dieu chinh chi tieu theo hang muc (giong dieu chinh so quy).
+    amount: duong = them chi (tru quy), am = giam/hoan ve quy. Quy co the am."""
+
+    category: str = Field(min_length=1, max_length=120)
+    amount: int = Field(description="Duong = them chi, am = giam/hoan. Khong duoc bang 0.")
+    paid_at: datetime
+    description: str = Field(min_length=1, max_length=500)
+
+    @field_validator("amount")
+    @classmethod
+    def amount_not_zero(cls, value: int) -> int:
+        if value == 0:
+            raise ValueError("amount khong duoc bang 0")
+        return value
 
 
 class FundAdjustmentCreate(BaseModel):
@@ -45,6 +65,7 @@ class FundTransactionRead(BaseModel):
     member_id: str | None
     play_session_id: str | None
     type: FundTransactionType
+    category: str | None = None
     amount: int
     balance_after: int | None
     description: str

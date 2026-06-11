@@ -9,9 +9,11 @@ from app.services.fund_transactions import (
     deposit_member_fund,
     get_fund_summary,
     list_fund_transactions,
+    spend_category,
     spend_common_fund,
 )
 from app.schemas.fund_transaction import (
+    CategoryExpenseCreate,
     CommonFundExpenseCreate,
     FundAdjustmentCreate,
     FundSummaryRead,
@@ -56,6 +58,15 @@ def spend_common_fund_endpoint(
     current_member: Member = Depends(require_treasurer),
 ):
     return spend_common_fund(db, payload, current_member)
+
+
+@router.post("/category-expense", response_model=FundTransactionRead, status_code=201)
+def spend_category_endpoint(
+    payload: CategoryExpenseCreate,
+    db: Session = Depends(get_db),
+    current_member: Member = Depends(require_treasurer),
+):
+    return spend_category(db, payload, current_member)
 
 
 @router.get("/summary", response_model=FundSummaryRead)

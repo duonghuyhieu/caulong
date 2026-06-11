@@ -34,13 +34,13 @@ export default function DashboardPage() {
   const playerStats = [
     { label: "Số dư của bạn", value: formatMoney(member?.balance ?? 0) },
     { label: "Tổng quỹ còn lại", value: formatMoney(summary.total_balance) },
-    { label: "Quỹ chung", value: formatMoney(summary.common_fund_balance) },
+    { label: "Quỹ hiện có", value: formatMoney(summary.common_fund_balance) },
   ];
 
   const treasurerStats = [
     { label: "Tổng quỹ còn lại", value: formatMoney(summary.total_balance) },
     { label: "Số dư thành viên", value: formatMoney(summary.member_total_balance) },
-    { label: "Quỹ chung", value: formatMoney(summary.common_fund_balance) },
+    { label: "Quỹ hiện có", value: formatMoney(summary.common_fund_balance) },
     { label: "Thành viên hoạt động", value: summary.active_member_count },
     { label: "Sắp hết quỹ", value: summary.low_balance_member_count },
     { label: "Tổng đã nộp", value: formatMoney(summary.total_deposit_amount) },

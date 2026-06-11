@@ -21,10 +21,11 @@ const NAV_LINKS = [
   { href: "/members", label: "Thành viên", treasurerOnly: false },
   { href: "/fund", label: "Sổ quỹ", treasurerOnly: false },
   { href: "/sessions", label: "Buổi chơi", treasurerOnly: false },
+  { href: "/reports", label: "Chi tiêu", treasurerOnly: true },
 ];
 
-// Khong con route nao chan han player — moi thao tac ghi da gate trong trang.
-const TREASURER_ONLY_PATHS: string[] = [];
+// Bao cao chi tieu chi danh cho thu quy (endpoint cung yeu cau treasurer).
+const TREASURER_ONLY_PATHS: string[] = ["/reports"];
 
 // Icon tu ve (tranh bo icon mac dinh), net mong dong nhat.
 const ICONS: Record<string, ReactNode> = {
@@ -54,6 +55,13 @@ const ICONS: Record<string, ReactNode> = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <circle cx="12" cy="18" r="3" />
       <path d="M12 15 8 4M12 15l4-11M8 4h8M9.5 9.5h5" />
+    </svg>
+  ),
+  "/reports": (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 20V4M4 20h16" />
+      <rect x="7.5" y="11" width="3" height="6" rx="0.6" />
+      <rect x="13" y="7" width="3" height="10" rx="0.6" />
     </svg>
   ),
 };

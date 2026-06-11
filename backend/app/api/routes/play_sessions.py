@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.models.member import Member
 from app.schemas.play_session import PlaySessionCreate, PlaySessionPreview, PlaySessionRead
 from app.services.auth import get_current_member, require_treasurer
+from app.services.cost_categories import list_category_names
 from app.services.play_sessions import (
     create_play_session,
     get_play_session,
@@ -14,6 +15,15 @@ from app.services.play_sessions import (
 
 
 router = APIRouter(prefix="/play-sessions", tags=["play-sessions"])
+
+
+@router.get("/cost-categories", response_model=list[str])
+def cost_categories_endpoint(
+    db: Session = Depends(get_db),
+    current_member: Member = Depends(get_current_member),
+):
+    """Ten cac hang muc chi phi (quan ly o /cost-categories)."""
+    return list_category_names(db)
 
 
 @router.post("/preview", response_model=PlaySessionPreview)

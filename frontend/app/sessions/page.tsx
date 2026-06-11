@@ -5,6 +5,7 @@ import { playSessionsApi, membersApi, ApiError } from "@/lib/api";
 import { formatMoney, formatDate } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { Dialog } from "@/components/Dialog";
+import { MoneyInput } from "@/components/MoneyInput";
 import { Pager } from "@/components/Pager";
 import type { Member, PlaySession, PlaySessionCreateInput, PlaySessionPreview } from "@/lib/types";
 
@@ -19,6 +20,7 @@ export default function SessionsPage() {
 
   const [members, setMembers] = useState<Member[]>([]);
   const [sessions, setSessions] = useState<PlaySession[]>([]);
+  const [costCategories, setCostCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -59,6 +61,7 @@ export default function SessionsPage() {
         // Tải members để hiển thị tên người tham gia (player cũng được phép GET /members).
         setMembers(await membersApi.list());
         setSessions(await playSessionsApi.list());
+        setCostCategories(await playSessionsApi.costCategories());
       } catch (err) {
         setError(err instanceof ApiError ? err.message : "Lỗi tải dữ liệu");
       } finally {
@@ -83,6 +86,7 @@ export default function SessionsPage() {
         <Dialog open={createOpen} onClose={() => setCreateOpen(false)} title="Tạo buổi chơi">
           <CreateSessionForm
             members={members}
+            categories={costCategories}
             onCreated={() => {
               setCreateOpen(false);
               loadSessions();
@@ -121,6 +125,19 @@ export default function SessionsPage() {
                   </button>
                   {open && (
                     <div className="xrow-detail">
+                      {s.cost_items.length > 0 ? (
+                        s.cost_items.map((c) => (
+                          <div className="drow" key={c.category}>
+                            <span className="k">{c.category}</span>
+                            <span className="v">{formatMoney(c.amount)}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="drow">
+                          <span className="k">Khoản chi</span>
+                          <span className="v muted">Chưa phân loại</span>
+                        </div>
+                      )}
                       <div className="drow">
                         <span className="k">Mỗi slot</span>
                         <span className="v">{formatMoney(s.cost_per_slot)}</span>
@@ -175,17 +192,27 @@ function todayLocal() {
 
 function CreateSessionForm({
   members,
+  categories,
   onCreated,
 }: {
   members: Member[];
+  categories: string[];
   onCreated: () => void;
 }) {
   const activeMembers = members.filter((m) => m.status === "active");
 
   const [playedAt, setPlayedAt] = useState(todayLocal());
-  const [totalCost, setTotalCost] = useState("");
+  // So tien tung hang muc (key = ten hang muc). Tong chi = tong cac dong.
+  const [amounts, setAmounts] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
+
+  const totalCost = categories.reduce((sum, c) => sum + (Number(amounts[c]) || 0), 0);
+
+  function setAmount(category: string, value: string) {
+    setAmounts((prev) => ({ ...prev, [category]: value }));
+    setPreview(null);
+  }
 
   const [preview, setPreview] = useState<PlaySessionPreview | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -227,14 +254,19 @@ function CreateSessionForm({
       .filter((r) => r.member_id)
       .map((r) => ({ member_id: r.member_id, slot_count: r.slot_count }));
 
-    if (!playedAt || !totalCost || participants.length === 0) {
-      setError("Cần điền thời gian, tổng chi và ít nhất 1 người chơi.");
+    // Chi lay cac hang muc co nhap so tien > 0.
+    const cost_items = categories
+      .map((c) => ({ category: c, amount: Number(amounts[c]) || 0 }))
+      .filter((ci) => ci.amount > 0);
+
+    if (!playedAt || cost_items.length === 0 || participants.length === 0) {
+      setError("Cần điền thời gian, ít nhất 1 khoản chi và 1 người chơi.");
       return null;
     }
     return {
       // playedAt la "YYYY-MM-DD" -> gui kem 00:00:00 cho dung kieu datetime cua backend
       played_at: `${playedAt}T00:00:00`,
-      total_cost: Number(totalCost),
+      cost_items,
       participants,
       note,
     };
@@ -262,7 +294,7 @@ function CreateSessionForm({
     try {
       await playSessionsApi.create(payload);
       setPlayedAt(todayLocal());
-      setTotalCost("");
+      setAmounts({});
       setNote("");
       setRows([]);
       setPreview(null);
@@ -295,39 +327,33 @@ function CreateSessionForm({
           />
         </div>
         <div className="field">
-          <label>Tổng chi phí (đồng)</label>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={1}
-            placeholder="vd: 200000"
-            value={totalCost}
-            onChange={(e) => {
-              setTotalCost(e.target.value);
-              setPreview(null);
-            }}
-          />
-          <div className="chips" style={{ marginTop: "0.5rem" }}>
-            {[100000, 150000, 200000, 300000].map((v) => (
-              <button
-                type="button"
-                key={v}
-                className="chip"
-                onClick={() => {
-                  setTotalCost(String(v));
-                  setPreview(null);
-                }}
-              >
-                {v / 1000}K
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="field">
           <label>Ghi chú (tuỳ chọn)</label>
           <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="vd: Sân 3, 19h" />
         </div>
       </div>
+
+      <h3>
+        Chi phí buổi{" "}
+        <span className="muted" style={{ fontWeight: 400 }}>
+          (tổng {formatMoney(totalCost)})
+        </span>
+      </h3>
+      {categories.length === 0 ? (
+        <p className="muted">Chưa cấu hình hạng mục chi phí.</p>
+      ) : (
+        <div className="grid">
+          {categories.map((c) => (
+            <div className="field" key={c}>
+              <label>{c} (đồng)</label>
+              <MoneyInput
+                placeholder="0"
+                value={amounts[c] ?? ""}
+                onChange={(v) => setAmount(c, v)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       <h3>
         Ai chơi hôm nay?{" "}

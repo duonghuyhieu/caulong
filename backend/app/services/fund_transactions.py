@@ -6,6 +6,7 @@ from sqlalchemy import select, func
 from app.models.fund_transaction import FundTransaction
 from app.models.member import Member
 from app.schemas.fund_transaction import (
+    CategoryExpenseCreate,
     CommonFundExpenseCreate,
     FundAdjustmentCreate,
     MemberDepositCreate,
@@ -15,10 +16,13 @@ from app.core.config import get_settings
 
 
 def common_fund_balance(db: Session) -> int:
-    """So du quy chung = tong cac giao dich khong gan thanh vien (chua bi huy)."""
+    """Quy hien co (tien mat thu quy dang cam) = tien nap + dieu chinh
+    - tach quy (ung vendor) - chi quy chung. Buoi choi KHONG dong vao day."""
     return db.scalar(
         select(func.coalesce(func.sum(FundTransaction.amount), 0)).where(
-            FundTransaction.member_id.is_(None),
+            FundTransaction.type.in_(
+                ["member_deposit", "manual_adjustment", "category_expense", "common_fund_expense"]
+            ),
             FundTransaction.voided_at.is_(None),
         )
     ) or 0
@@ -131,6 +135,39 @@ def spend_common_fund(
     return transaction
 
 
+def spend_category(
+    db: Session,
+    payload: CategoryExpenseCreate,
+    created_by: Member,
+) -> FundTransaction:
+    """Dieu chinh chi tieu theo hang muc (giong dieu chinh so quy).
+    amount duong = them chi (tru quy), am = giam/hoan ve quy. Quy ung truoc nen
+    KHONG chan khi so du am."""
+    transaction = FundTransaction(
+        member_id=None,
+        type="category_expense",
+        category=payload.category.strip(),
+        # amount duong (them chi) -> tru quy (so am). amount am (hoan) -> cong quy.
+        amount=-payload.amount,
+        balance_after=None,
+        description=payload.description.strip(),
+        created_by_member_id=created_by.id,
+        created_at=payload.paid_at,
+    )
+
+    db.add(transaction)
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid fund transaction data")
+
+    db.refresh(transaction)
+
+    return transaction
+
+
 def list_fund_transactions(
     db: Session,
     member_id: str | None = None,
@@ -189,8 +226,10 @@ def get_fund_summary(db: Session) -> dict:
 
     return {
         "member_total_balance": member_total_balance,
+        # common_fund_balance giờ = "Quỹ hiện có" (tiền mặt thủ quỹ đang cầm).
         "common_fund_balance": common_balance,
-        "total_balance": member_total_balance + common_balance,
+        # Tổng tiền nhóm = tổng số dư mọi người (= quỹ hiện có + đang ứng ở vendor).
+        "total_balance": member_total_balance,
         "active_member_count": active_member_count,
         "low_balance_member_count": low_balance_member_count,
         "total_deposit_amount": total_deposit_amount,

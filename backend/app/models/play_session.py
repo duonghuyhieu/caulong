@@ -40,6 +40,10 @@ class PlaySession(Base):
     back_populates="session",
     cascade="all, delete-orphan",
     )
+    cost_items: Mapped[list["PlaySessionCostItem"]] = relationship(
+        back_populates="session",
+        cascade="all, delete-orphan",
+    )
 
 
 class PlaySessionParticipant(Base):
@@ -66,3 +70,46 @@ class PlaySessionParticipant(Base):
     charged_amount: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     session: Mapped["PlaySession"] = relationship(back_populates="participants")
+
+
+class CostCategory(Base):
+    """Hang muc chi phi quan ly duoc (them/sua/xoa). Dung de dien san vao form
+    tao buoi. Buoi cu luu category theo ten (string) nen doi ten o day khong
+    hoi to lai du lieu cu."""
+
+    __tablename__ = "cost_categories"
+
+    id: Mapped[str] = mapped_column(
+        String(32),
+        primary_key=True,
+        default=lambda: uuid4().hex,
+    )
+    name: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class PlaySessionCostItem(Base):
+    """Mot dong chi phi cua buoi choi (vd: tien san, tien cau, tien nuoc).
+
+    Tong cac dong = total_cost cua buoi. Chi de theo doi tien di dau; khong
+    anh huong cach chia tien (van chia theo slot tren tong).
+    """
+
+    __tablename__ = "play_session_cost_items"
+
+    id: Mapped[str] = mapped_column(
+        String(32),
+        primary_key=True,
+        default=lambda: uuid4().hex,
+    )
+    play_session_id: Mapped[str] = mapped_column(
+        String(32),
+        ForeignKey("play_sessions.id"),
+        nullable=False,
+        index=True,
+    )
+    category: Mapped[str] = mapped_column(String(120), nullable=False)
+    amount: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    session: Mapped["PlaySession"] = relationship(back_populates="cost_items")

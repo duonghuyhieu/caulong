@@ -42,13 +42,17 @@ export type FundTransactionType =
   | "rounding_surplus"
   | "manual_adjustment"
   | "session_refund"
-  | "common_fund_expense";
+  | "common_fund_expense"
+  | "session_payment"
+  | "session_expense"
+  | "category_expense";
 
 export interface FundTransaction {
   id: string;
   member_id: string | null;
   play_session_id: string | null;
   type: FundTransactionType;
+  category: string | null;
   amount: number;
   balance_after: number | null;
   description: string;
@@ -75,6 +79,14 @@ export interface DepositInput {
   description: string;
 }
 
+// Dieu chinh chi tieu theo hang muc (giong dieu chinh so quy).
+export interface CategoryExpenseInput {
+  category: string;
+  amount: number; // != 0, duong = them chi, am = giam/hoan
+  paid_at: string; // ISO datetime
+  description: string;
+}
+
 export interface AdjustmentInput {
   member_id: string;
   amount: number; // != 0, am la tru
@@ -95,6 +107,20 @@ export interface PlaySessionParticipant {
   created_at: string;
 }
 
+// Mot dong chi phi cua buoi (tien san, tien cau, tien nuoc...).
+export interface CostItem {
+  category: string;
+  amount: number;
+}
+
+// Hang muc chi phi quan ly duoc (CRUD).
+export interface CostCategory {
+  id: string;
+  name: string;
+  position: number;
+  created_at: string;
+}
+
 export interface PlaySession {
   id: string;
   played_at: string;
@@ -109,6 +135,7 @@ export interface PlaySession {
   created_at: string;
   updated_at: string;
   participants: PlaySessionParticipant[];
+  cost_items: CostItem[];
 }
 
 export interface PlaySessionParticipantInput {
@@ -118,7 +145,8 @@ export interface PlaySessionParticipantInput {
 
 export interface PlaySessionCreateInput {
   played_at: string; // ISO datetime
-  total_cost: number;
+  // Tong chi phi = tong cac dong; backend tu tinh total_cost.
+  cost_items: CostItem[];
   participants: PlaySessionParticipantInput[];
   note?: string;
 }
@@ -134,6 +162,22 @@ export interface PlaySessionPreview {
     slot_count: number;
     charged_amount: number;
   }[];
+  cost_items: CostItem[];
+}
+
+// ---- Bao cao chi tieu: moi hang muc la mot "vi" ----
+export interface CategoryWallet {
+  category: string;
+  advanced: number; // da ung (tach quy)
+  used: number; // da dung (qua buoi choi)
+  remaining: number; // con lai
+}
+
+export interface CostByCategoryReport {
+  categories: CategoryWallet[];
+  total_advanced: number;
+  total_used: number;
+  total_remaining: number;
 }
 
 export interface TokenResponse {

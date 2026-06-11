@@ -19,7 +19,11 @@ from app.models.member import Member
 from app.models.play_session import PlaySession
 from app.schemas.fund_transaction import MemberDepositCreate
 from app.schemas.member import MemberCreate
-from app.schemas.play_session import PlaySessionCreate, PlaySessionParticipantCreate
+from app.schemas.play_session import (
+    CostItemCreate,
+    PlaySessionCreate,
+    PlaySessionParticipantCreate,
+)
 from app.services.fund_transactions import deposit_member_fund
 from app.services.members import create_member
 from app.services.play_sessions import create_play_session
@@ -97,28 +101,29 @@ DEPOSIT_AMOUNTS = {
     "khanh.bui": 150_000,
 }
 
+# cost_items: tong cac dong = tong chi phi buoi (hien chi co cau long).
 SESSION_PLANS = [
     {
         "days_ago": 28,
-        "total_cost": 420_000,
+        "cost_items": [("Tiền sân", 280_000), ("Tiền cầu", 100_000), ("Tiền nước", 40_000)],
         "participants": ["minh.nguyen", "lan.tran", "tuan.pham", "hoa.le", "quang.vo", "vy.hoang"],
         "note": "San 2h + cau Aeroplane",
     },
     {
         "days_ago": 21,
-        "total_cost": 460_000,
+        "cost_items": [("Tiền sân", 280_000), ("Tiền cầu", 140_000), ("Tiền nước", 40_000)],
         "participants": ["minh.nguyen", "lan.tran", "hoa.le", "an.do", "vy.hoang", "khanh.bui"],
         "note": "San 2h, them 1 hop cau",
     },
     {
         "days_ago": 14,
-        "total_cost": 390_000,
+        "cost_items": [("Tiền sân", 280_000), ("Tiền cầu", 80_000), ("Tiền nước", 30_000)],
         "participants": ["minh.nguyen", "tuan.pham", "hoa.le", "quang.vo", "an.do"],
         "note": "Buoi giua tuan",
     },
     {
         "days_ago": 7,
-        "total_cost": 520_000,
+        "cost_items": [("Tiền sân", 320_000), ("Tiền cầu", 150_000), ("Tiền nước", 50_000)],
         "participants": [
             "minh.nguyen",
             "lan.tran",
@@ -199,11 +204,15 @@ def ensure_play_session(db, plan: dict, members_by_username: dict[str, Member], 
         print(f"= session: {played_at.date().isoformat()}")
         return
 
+    total_cost = sum(amount for _, amount in plan["cost_items"])
     create_play_session(
         db,
         PlaySessionCreate(
             played_at=played_at,
-            total_cost=plan["total_cost"],
+            cost_items=[
+                CostItemCreate(category=category, amount=amount)
+                for category, amount in plan["cost_items"]
+            ],
             note=note,
             participants=[
                 PlaySessionParticipantCreate(
@@ -215,7 +224,7 @@ def ensure_play_session(db, plan: dict, members_by_username: dict[str, Member], 
         ),
         created_by=treasurer,
     )
-    print(f"+ session: {played_at.date().isoformat()} {plan['total_cost']:,} VND")
+    print(f"+ session: {played_at.date().isoformat()} {total_cost:,} VND")
 
 
 def seed() -> None:

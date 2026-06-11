@@ -23,6 +23,8 @@ class FundTransaction(Base):
     )
     play_session_id: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
     type: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+    # Hang muc chi (vd: Tien san). Chi dat cho cac giao dich chi theo hang muc.
+    category: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     balance_after: Mapped[int | None] = mapped_column(Integer, nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)

@@ -3,7 +3,6 @@ from datetime import date, datetime
 from typing import Any
 
 from fastapi import HTTPException, status
-from openai import OpenAI
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -196,6 +195,16 @@ def answer_question(
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="OPENAI_API_KEY chua duoc cau hinh",
+        )
+
+    # Import lazy: chi can goi tro ly AI moi can goi 'openai', tranh bat buoc cai
+    # goi nay de boot duoc backend.
+    try:
+        from openai import OpenAI
+    except ModuleNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Thu vien openai chua duoc cai dat tren server",
         )
 
     client = OpenAI(api_key=settings.openai_api_key)
@@ -566,6 +575,10 @@ def serialize_play_session(session: PlaySession) -> dict[str, Any]:
         },
         "status": session.status,
         "note": session.note,
+        "cost_items": [
+            {"category": item.category, "amount": item.amount}
+            for item in session.cost_items
+        ],
         "participants": [
             {
                 "member_id": participant.member_id,
