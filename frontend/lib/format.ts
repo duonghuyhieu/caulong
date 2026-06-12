@@ -24,5 +24,5 @@ export const TRANSACTION_TYPE_LABEL: Record<string, string> = {
   common_fund_expense: "Chi quỹ chung",
   session_payment: "Người chơi trả quỹ",
   session_expense: "Quỹ chi buổi chơi",
-  category_expense: "Tách quỹ",
+  category_expense: "Phân bổ ngân sách",
 };

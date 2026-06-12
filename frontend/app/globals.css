@@ -412,6 +412,8 @@ h3 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
   gap: 0.85rem;
+  /* khop voi margin-bottom cua .card de cac khoi khong dinh nhau */
+  margin-bottom: 1rem;
 }
 
 /* ---- Stat tiles ---- */
@@ -1374,4 +1376,489 @@ button.ghost:hover {
   font-variant-numeric: tabular-nums;
   min-width: 2.6rem;
   text-align: right;
+}
+
+/* ===== Ngan sach: the ngan sach theo hang muc ===== */
+.budget-hint {
+  margin: -0.6rem 0 1.1rem;
+  font-size: 0.875rem;
+  max-width: 56ch;
+}
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.9rem;
+}
+.budget-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 0;
+  border-top: 3px solid var(--accent);
+}
+.budget-card.over {
+  border-top-color: var(--neg);
+}
+.budget-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.budget-name {
+  font-weight: 600;
+}
+.budget-flag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--neg);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
+}
+.budget-remaining {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.45rem;
+  font-weight: 650;
+  color: var(--accent);
+}
+.budget-card.over .budget-remaining {
+  color: var(--neg);
+}
+.budget-remaining-label {
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+.budget-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Tong quan: hero "tien cua nhom" + thanh phan bo =====
+   Giu lai .hero-* cho truong hop co page nao khac con dung.
+   Cac class moi dung prefix dash- de tranh anh huong trang khac. */
+
+/* --- Compat: giu lai hero-* cu (khong xoa de khong break) --- */
+.hero-card { padding: 1.4rem 1.5rem 1.3rem; }
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+.hero-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.7rem, 5vw, 2.3rem);
+  font-weight: 680;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.9rem;
+}
+.hero-value.neg { color: var(--neg); }
+.flow-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--line-soft);
+  margin-bottom: 0.65rem;
+}
+.flow-seg { height: 100%; transition: width 0.4s ease; }
+.flow-seg.cash { background: var(--pos); }
+.flow-seg.reserved { background: var(--accent); }
+.flow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.flow-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.flow-legend b {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 620;
+  color: var(--ink);
+}
+.flow-legend b.neg { color: var(--neg); }
+.flow-legend .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.flow-legend .dot.cash { background: var(--pos); }
+.flow-legend .dot.reserved { background: var(--accent); }
+.hero-warn { margin: 0.8rem 0 0; font-size: 0.85rem; color: var(--neg); }
+
+/* --- Shared helpers con dung o nhieu trang --- */
+.stat .value.warn { color: var(--neg); }
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+.sec-head h2 { margin: 0; font-size: 1.02rem; }
+.sec-link {
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sec-link:hover { text-decoration: underline; }
+
+/* =================================================================
+   DASHBOARD (TONG QUAN) — giao dien moi, hien dai va nang dong.
+   Tat ca class dung prefix "dash-" de khong anh huong trang khac.
+   ================================================================= */
+
+/* Wrapper tong the dashboard */
+.dash-root {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ---- Hero card ---- */
+.dash-hero-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 1.6rem 1.5rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow:
+    var(--shadow-sm),
+    0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
+  /* Vien accent nhe o tren */
+  border-top: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* Hero card khi so du am (nguoi choi) */
+.dash-hero-card.dash-hero-neg {
+  border-top-color: color-mix(in srgb, var(--neg) 55%, transparent);
+  box-shadow:
+    var(--shadow-sm),
+    0 0 0 1px color-mix(in srgb, var(--neg) 18%, transparent);
+}
+
+/* Hieu ung glow nen phia sau */
+.dash-hero-glow {
+  position: absolute;
+  top: -60px;
+  right: -40px;
+  width: 280px;
+  height: 200px;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--accent) 14%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  border-radius: 50%;
+}
+.dash-hero-card.dash-hero-neg .dash-hero-glow {
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--neg) 10%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+/* Dong tren cung: nhan + badge */
+.dash-hero-top {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Nhan nho phia tren so */
+.dash-hero-label {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+/* Badge trang thai (thu quy / canh bao) */
+.dash-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-pill);
+  padding: 0.18rem 0.55rem;
+}
+.dash-hero-badge-neg {
+  color: var(--neg);
+  background: var(--danger-tint);
+  border-color: color-mix(in srgb, var(--neg) 38%, transparent);
+}
+
+/* So lon: so du / tong tien */
+.dash-hero-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2rem, 7vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink);
+  margin-bottom: 1.1rem;
+}
+.dash-hero-value.neg {
+  color: var(--neg);
+}
+
+/* Thanh phan bo (flow bar) — cao hon, gradient moi */
+.dash-flow-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--line) 60%, transparent);
+  margin-bottom: 0.8rem;
+  gap: 1px;
+}
+.dash-flow-seg {
+  height: 100%;
+  min-width: 3px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dash-flow-cash {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--pos) 90%, #fff),
+    var(--pos)
+  );
+  border-radius: 999px 0 0 999px;
+}
+.dash-flow-reserved {
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent-deep) 80%, #fff)
+  );
+  border-radius: 0 999px 999px 0;
+}
+
+/* Legend phan bo */
+.dash-flow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.6rem;
+}
+.dash-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.dash-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  display: inline-block;
+}
+.dash-dot-cash { background: var(--pos); }
+.dash-dot-reserved { background: var(--accent); }
+.dash-legend-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.dash-legend-amount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.84rem;
+  font-weight: 620;
+  color: var(--ink);
+}
+.dash-legend-amount.neg { color: var(--neg); }
+
+/* Canh bao: quy am / so du thap */
+.dash-hero-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0.9rem 0 0;
+  padding: 0.6rem 0.75rem;
+  background: var(--danger-tint);
+  border: 1px solid color-mix(in srgb, var(--neg) 28%, transparent);
+  border-radius: var(--r-sm);
+  font-size: 0.82rem;
+  color: var(--neg);
+  line-height: 1.4;
+}
+.dash-hero-warn svg {
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+
+/* ---- Icon nho tren stat tile ---- */
+.dash-stat-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  margin-bottom: 0.55rem;
+  opacity: 0.75;
+  transition: opacity 0.2s var(--ease), color 0.2s var(--ease);
+}
+.stat:hover .dash-stat-icon {
+  opacity: 1;
+  color: var(--accent);
+}
+
+/* ---- Budget mini-list tren dashboard ---- */
+.dash-budget-card {
+  padding: 1.15rem 1.25rem 1.3rem;
+}
+
+/* Cat-row co them hieu ung mo rong */
+.dash-cat-row {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.dash-cat-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.dash-cat-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.dash-cat-pct {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  min-width: 2.2rem;
+  text-align: right;
+}
+
+/* Bar voi hieu ung animate khi load */
+.dash-cat-bar {
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent-deep) 70%, #fff 30%)
+  );
+}
+
+/* ---- Skeleton loading ---- */
+.dash-hero-skeleton {
+  min-height: 160px;
+}
+.skel {
+  background: color-mix(in srgb, var(--surface-3) 80%, transparent);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.skel-label  { height: 10px; width: 90px; margin-bottom: 0.6rem; }
+.skel-value  { height: 38px; width: 55%; margin-bottom: 1rem; border-radius: var(--r); }
+.skel-bar    { height: 10px; width: 100%; margin-bottom: 0.75rem; border-radius: 999px; }
+.skel-legend { height: 14px; width: 75%; }
+.skel-stat-label { height: 9px; width: 60%; margin-bottom: 0.6rem; }
+.skel-stat-value { height: 24px; width: 45%; }
+
+/* Shimmer animation tren skeleton */
+@media (prefers-reduced-motion: no-preference) {
+  .skel {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--surface-3) 80%, transparent) 25%,
+      color-mix(in srgb, var(--surface-3) 40%, var(--accent-tint)) 50%,
+      color-mix(in srgb, var(--surface-3) 80%, transparent) 75%
+    );
+    background-size: 200% 100%;
+    animation: skel-shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes skel-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+}
+
+/* ---- Entrance animation cho hero card ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .dash-hero-card {
+    animation: dash-hero-in 0.5s var(--ease) both;
+  }
+  @keyframes dash-hero-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.992);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Animate chieu rong cua thanh flow bar sau khi render */
+  .dash-flow-cash,
+  .dash-flow-reserved {
+    animation: dash-bar-grow 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.2s;
+  }
+  @keyframes dash-bar-grow {
+    from { opacity: 0.4; }
+    to   { opacity: 1; }
+  }
+
+  /* Animate cat-bar khi vao man hinh */
+  .dash-cat-bar {
+    animation: dash-cat-bar-in 0.5s var(--ease) both;
+  }
+  @keyframes dash-cat-bar-in {
+    from { opacity: 0; transform: scaleX(0); transform-origin: left; }
+    to   { opacity: 1; transform: scaleX(1); transform-origin: left; }
+  }
+
+  /* Entrance delay cho tung budget row */
+  .dash-cat-row:nth-child(1) .dash-cat-bar { animation-delay: 0.10s; }
+  .dash-cat-row:nth-child(2) .dash-cat-bar { animation-delay: 0.16s; }
+  .dash-cat-row:nth-child(3) .dash-cat-bar { animation-delay: 0.22s; }
+  .dash-cat-row:nth-child(4) .dash-cat-bar { animation-delay: 0.28s; }
+  .dash-cat-row:nth-child(5) .dash-cat-bar { animation-delay: 0.34s; }
+  .dash-cat-row:nth-child(6) .dash-cat-bar { animation-delay: 0.40s; }
+}
+
+/* ---- Responsive: man hinh nho ---- */
+@media (max-width: 767px) {
+  .dash-hero-card {
+    padding: 1.3rem 1.15rem 1.2rem;
+  }
+  .dash-hero-value {
+    font-size: clamp(1.75rem, 9vw, 2.3rem);
+  }
+  .dash-flow-legend {
+    gap: 0.5rem 1rem;
+  }
+  .dash-legend-label {
+    font-size: 0.75rem;
+  }
 }

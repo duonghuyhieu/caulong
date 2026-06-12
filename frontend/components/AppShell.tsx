@@ -21,7 +21,7 @@ const NAV_LINKS = [
   { href: "/members", label: "Thành viên", treasurerOnly: false },
   { href: "/fund", label: "Sổ quỹ", treasurerOnly: false },
   { href: "/sessions", label: "Buổi chơi", treasurerOnly: false },
-  { href: "/reports", label: "Chi tiêu", treasurerOnly: true },
+  { href: "/reports", label: "Ngân sách", treasurerOnly: true },
 ];
 
 // Bao cao chi tieu chi danh cho thu quy (endpoint cung yeu cau treasurer).

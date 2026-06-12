@@ -54,78 +54,85 @@ export default function ReportsPage() {
   return (
     <div>
       <div className="page-head">
-        <h1>Chi tiêu</h1>
+        <h1>Ngân sách</h1>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           <button type="button" className="ghost" onClick={() => setCatOpen(true)}>
             Hạng mục
           </button>
           <button type="button" onClick={() => setPayOpen(true)}>
-            + Tách quỹ
+            + Phân bổ
           </button>
         </div>
       </div>
 
-      <div className="card">
-        {error && <p className="error">{error}</p>}
-        {loading ? (
-          <p className="muted center">Đang tải...</p>
-        ) : report && cats.length > 0 ? (
-          <>
-            <div className="summary" style={{ marginBottom: "1.2rem" }}>
-              <div className="item">
-                <span className="k">Đã ứng</span>
-                <span className="v">{formatMoney(report.total_advanced)}</span>
-              </div>
-              <div className="item">
-                <span className="k">Đã dùng</span>
-                <span className="v">{formatMoney(report.total_used)}</span>
-              </div>
-              <div className="item">
-                <span className="k">Còn lại</span>
-                <span className="v accent">{formatMoney(report.total_remaining)}</span>
-              </div>
-            </div>
+      <p className="muted budget-hint">
+        Mọi người đóng vào quỹ chung, thủ quỹ phân bổ tiền đó cho từng khoản phải chi.
+        Mỗi buổi chơi sẽ trừ dần vào khoản tương ứng.
+      </p>
 
-            <div className="cat-list">
-              {cats.map((c) => {
-                // Thanh tien do = da dung / da ung.
-                const width =
-                  c.advanced > 0 ? Math.min(100, (c.used / c.advanced) * 100) : c.used > 0 ? 100 : 0;
-                const over = c.remaining < 0; // dung vuot muc da ung
-                return (
-                  <div className="cat-row wallet" key={c.category}>
-                    <div className="cat-head">
-                      <span className="cat-name">{c.category}</span>
-                      <span className="cat-amount" style={over ? { color: "var(--neg)" } : undefined}>
-                        Còn {formatMoney(c.remaining)}
-                      </span>
-                    </div>
-                    <div className="cat-track">
-                      <div
-                        className="cat-bar"
-                        style={{ width: `${width}%`, background: over ? "var(--neg)" : undefined }}
-                      />
-                    </div>
-                    <div className="cat-sub muted">
-                      Đã ứng {formatMoney(c.advanced)} · Đã dùng {formatMoney(c.used)}
-                    </div>
-                  </div>
-                );
-              })}
+      {error && <p className="error">{error}</p>}
+      {loading ? (
+        <p className="muted center">Đang tải...</p>
+      ) : report && cats.length > 0 ? (
+        <>
+          <div className="summary" style={{ marginBottom: "1.2rem" }}>
+            <div className="item">
+              <span className="k">Đã phân bổ</span>
+              <span className="v">{formatMoney(report.total_advanced)}</span>
             </div>
-          </>
-        ) : (
+            <div className="item">
+              <span className="k">Đã dùng</span>
+              <span className="v">{formatMoney(report.total_used)}</span>
+            </div>
+            <div className="item">
+              <span className="k">Còn lại</span>
+              <span className="v accent">{formatMoney(report.total_remaining)}</span>
+            </div>
+          </div>
+
+          <div className="budget-grid">
+            {cats.map((c) => {
+              const pct =
+                c.advanced > 0 ? Math.min(100, (c.used / c.advanced) * 100) : c.used > 0 ? 100 : 0;
+              const over = c.remaining < 0; // dung vuot muc phan bo
+              return (
+                <div className={`card budget-card${over ? " over" : ""}`} key={c.category}>
+                  <div className="budget-top">
+                    <span className="budget-name">{c.category}</span>
+                    {over && <span className="budget-flag">Vượt mức</span>}
+                  </div>
+                  <div className="budget-remaining">
+                    {formatMoney(c.remaining)}
+                    <span className="budget-remaining-label">còn lại</span>
+                  </div>
+                  <div className="cat-track">
+                    <div
+                      className="cat-bar"
+                      style={{ width: `${pct}%`, background: over ? "var(--neg)" : undefined }}
+                    />
+                  </div>
+                  <div className="budget-foot muted">
+                    <span>Phân bổ {formatMoney(c.advanced)}</span>
+                    <span>Đã dùng {formatMoney(c.used)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <div className="card">
           <p className="muted center" style={{ padding: "1.2rem 0" }}>
-            Chưa có hạng mục nào.
+            Chưa có hạng mục nào. Bấm "Hạng mục" để tạo, rồi "+ Phân bổ" để chia tiền từ quỹ chung.
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       <Dialog open={catOpen} onClose={() => setCatOpen(false)} title="Hạng mục chi">
         <CategoryManager />
       </Dialog>
 
-      <Dialog open={payOpen} onClose={() => setPayOpen(false)} title="Tách quỹ cho hạng mục">
+      <Dialog open={payOpen} onClose={() => setPayOpen(false)} title="Phân bổ ngân sách">
         <PaymentForm
           onDone={() => {
             setPayOpen(false);
@@ -137,7 +144,7 @@ export default function ReportsPage() {
   );
 }
 
-// Tach quy: ung tien tu quy chung cho mot hang muc (tra chu san/tap hoa truoc).
+// Phan bo ngan sach: chia tien tu quy chung cho mot hang muc (tra chu san/tap hoa truoc).
 function PaymentForm({ onDone }: { onDone: () => void }) {
   const [categories, setCategories] = useState<CostCategory[]>([]);
   const [category, setCategory] = useState("");
@@ -162,7 +169,7 @@ function PaymentForm({ onDone }: { onDone: () => void }) {
   async function submit() {
     setError(null);
     if (value <= 0) {
-      setError("Số tiền ứng phải lớn hơn 0.");
+      setError("Số tiền phân bổ phải lớn hơn 0.");
       return;
     }
     setSubmitting(true);
@@ -175,7 +182,7 @@ function PaymentForm({ onDone }: { onDone: () => void }) {
       });
       onDone();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Không tách quỹ được");
+      setError(err instanceof ApiError ? err.message : "Không phân bổ được");
     } finally {
       setSubmitting(false);
     }
@@ -200,7 +207,7 @@ function PaymentForm({ onDone }: { onDone: () => void }) {
         </select>
       </div>
       <div className="field">
-        <label>Số tiền ứng (lấy từ quỹ chung)</label>
+        <label>Số tiền phân bổ (lấy từ quỹ chung)</label>
         <MoneyInput
           placeholder="vd: 2.000.000"
           value={amount}
@@ -224,7 +231,7 @@ function PaymentForm({ onDone }: { onDone: () => void }) {
       </div>
       {error && <p className="error">{error}</p>}
       <button type="submit" disabled={submitting || !category || !amount || !description.trim()}>
-        {submitting ? "Đang lưu..." : "Tách quỹ"}
+        {submitting ? "Đang lưu..." : "Phân bổ"}
       </button>
     </form>
   );
