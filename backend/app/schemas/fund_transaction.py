@@ -11,6 +11,7 @@ FundTransactionType = Literal[
     "manual_adjustment",
     "session_refund",
     "common_fund_expense",
+    "surplus_expense",
     "session_payment",
     "session_expense",
     "category_expense",
@@ -24,10 +25,12 @@ class MemberDepositCreate(BaseModel):
 
 
 class CommonFundExpenseCreate(BaseModel):
-    """Chi tien tu quy chung cho hoat dong tap the (amount > 0 la so tien chi ra)."""
+    """Chi tien cho hoat dong tap the (amount > 0 la so tien chi ra).
+    source: 'quy' = tru tien mat (Quy hien co); 'quy_chung' = tru tien thua lam tron."""
 
     amount: int = Field(gt=0)
     description: str = Field(min_length=1, max_length=500)
+    source: Literal["quy", "quy_chung"] = "quy"
 
 
 class CategoryExpenseCreate(BaseModel):

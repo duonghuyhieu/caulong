@@ -253,20 +253,36 @@ export default function FundPage() {
       </Dialog>
 
       <Dialog open={dialog === "common"} onClose={() => setDialog(null)} title="Chi quỹ">
-        <CommonExpenseForm balance={summary?.common_fund_balance ?? 0} onDone={afterDialog} />
+        <CommonExpenseForm
+          cash={summary?.common_fund_balance ?? 0}
+          surplus={summary?.total_rounding_surplus_amount ?? 0}
+          onDone={afterDialog}
+        />
       </Dialog>
     </div>
   );
 }
 
-// Chi tien tu quy chung cho hoat dong tap the (lien hoan, mua nuoc, ...).
-function CommonExpenseForm({ balance, onDone }: { balance: number; onDone: () => void }) {
+// Chi tien cho hoat dong tap the (lien hoan, mua nuoc, ...).
+// Chon nguon: Quy (tien mat) hoac Quy chung (tien thua lam tron).
+function CommonExpenseForm({
+  cash,
+  surplus,
+  onDone,
+}: {
+  cash: number;
+  surplus: number;
+  onDone: () => void;
+}) {
+  const [source, setSource] = useState<"quy" | "quy_chung">("quy");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const value = Number(amount) || 0;
+  const balance = source === "quy_chung" ? surplus : cash;
+  const balanceLabel = source === "quy_chung" ? "Quỹ chung hiện có" : "Quỹ hiện có";
   const overBalance = value > balance;
 
   function addAmount(delta: number) {
@@ -277,7 +293,7 @@ function CommonExpenseForm({ balance, onDone }: { balance: number; onDone: () =>
     setError(null);
     setSubmitting(true);
     try {
-      await fundApi.spendCommon({ amount: value, description });
+      await fundApi.spendCommon({ amount: value, description, source });
       onDone();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Không chi được");
@@ -293,9 +309,17 @@ function CommonExpenseForm({ balance, onDone }: { balance: number; onDone: () =>
         void submit();
       }}
     >
+      <div className="field">
+        <label>Chi từ nguồn</label>
+        <select value={source} onChange={(e) => setSource(e.target.value as "quy" | "quy_chung")}>
+          <option value="quy">Quỹ · tiền mặt còn giữ</option>
+          <option value="quy_chung">Quỹ chung · tiền thừa làm tròn</option>
+        </select>
+      </div>
+
       <div className="summary">
         <div className="item">
-          <span className="k">Quỹ hiện có</span>
+          <span className="k">{balanceLabel}</span>
           <span className="v accent">{formatMoney(balance)}</span>
         </div>
         {value > 0 && !overBalance && (
@@ -339,11 +363,15 @@ function CommonExpenseForm({ balance, onDone }: { balance: number; onDone: () =>
         />
       </div>
 
-      {overBalance && <p className="error">Vượt quá quỹ hiện có ({formatMoney(balance)}).</p>}
+      {overBalance && (
+        <p className="error">
+          Vượt quá {balanceLabel.toLowerCase()} ({formatMoney(balance)}).
+        </p>
+      )}
       {error && <p className="error">{error}</p>}
 
       <button type="submit" disabled={submitting || value <= 0 || overBalance}>
-        {submitting ? "Đang lưu..." : "Chi quỹ"}
+        {submitting ? "Đang lưu..." : source === "quy_chung" ? "Chi quỹ chung" : "Chi quỹ"}
       </button>
     </form>
   );

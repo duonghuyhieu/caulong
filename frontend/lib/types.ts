@@ -43,6 +43,7 @@ export type FundTransactionType =
   | "manual_adjustment"
   | "session_refund"
   | "common_fund_expense"
+  | "surplus_expense"
   | "session_payment"
   | "session_expense"
   | "category_expense";
@@ -94,8 +95,9 @@ export interface AdjustmentInput {
 }
 
 export interface CommonFundExpenseInput {
-  amount: number; // > 0, so tien chi ra tu quy chung
+  amount: number; // > 0, so tien chi ra
   description: string;
+  source?: "quy" | "quy_chung"; // quy = tien mat; quy_chung = tien thua lam tron
 }
 
 export interface PlaySessionParticipant {

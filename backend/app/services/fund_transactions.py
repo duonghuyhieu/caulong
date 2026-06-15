@@ -18,15 +18,36 @@ from app.core.config import get_settings
 
 def common_fund_balance(db: Session) -> int:
     """Quy hien co (tien mat thu quy dang cam) = tien nap + dieu chinh
-    - tach quy (ung vendor) - chi quy chung. Buoi choi KHONG dong vao day."""
+    - phan bo ngan sach - chi quy - chi quy chung. Buoi choi KHONG dong vao day."""
     return db.scalar(
         select(func.coalesce(func.sum(FundTransaction.amount), 0)).where(
             FundTransaction.type.in_(
-                ["member_deposit", "manual_adjustment", "category_expense", "common_fund_expense"]
+                [
+                    "member_deposit",
+                    "manual_adjustment",
+                    "category_expense",
+                    "common_fund_expense",
+                    "surplus_expense",
+                ]
             ),
             FundTransaction.voided_at.is_(None),
         )
     ) or 0
+
+
+def quy_chung_balance(db: Session) -> int:
+    """Quy chung = tien thua lam tron con lai = tong surplus moi tran - da chi quy chung."""
+    surplus_income = db.scalar(
+        select(func.coalesce(func.sum(PlaySession.surplus_amount), 0))
+    ) or 0
+    surplus_spent = db.scalar(
+        select(func.coalesce(func.sum(FundTransaction.amount), 0)).where(
+            FundTransaction.type == "surplus_expense",
+            FundTransaction.voided_at.is_(None),
+        )
+    ) or 0
+    # surplus_spent la so am (chi ra) nen cong vao.
+    return surplus_income + surplus_spent
 
 
 def get_member_or_404(db: Session, member_id: str) -> Member:
@@ -105,18 +126,27 @@ def spend_common_fund(
     payload: CommonFundExpenseCreate,
     created_by: Member,
 ) -> FundTransaction:
-    """Chi tien tu quy chung cho hoat dong tap the. Khong duoc chi vuot so du."""
-    balance = common_fund_balance(db)
-
-    if payload.amount > balance:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Quỹ chung không đủ. Số dư hiện tại: {balance}.",
-        )
+    """Chi tien cho hoat dong tap the. Khong duoc chi vuot so du cua nguon da chon."""
+    if payload.source == "quy_chung":
+        balance = quy_chung_balance(db)
+        if payload.amount > balance:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Quỹ chung không đủ. Hiện có: {balance}.",
+            )
+        tx_type = "surplus_expense"
+    else:
+        balance = common_fund_balance(db)
+        if payload.amount > balance:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Quỹ không đủ. Số dư hiện tại: {balance}.",
+            )
+        tx_type = "common_fund_expense"
 
     transaction = FundTransaction(
         member_id=None,
-        type="common_fund_expense",
+        type=tx_type,
         amount=-payload.amount,
         balance_after=None,
         description=payload.description,
@@ -218,11 +248,8 @@ def get_fund_summary(db: Session) -> dict:
         )
     ) or 0
 
-    # Tien thua lam tron ("quy chung"): cong don chenh lech tien thu - chi phi
-    # that cua tung tran (surplus_amount). Day la tien du ra do lam tron moi tran.
-    total_rounding_surplus_amount = db.scalar(
-        select(func.coalesce(func.sum(PlaySession.surplus_amount), 0))
-    ) or 0
+    # Quy chung = tien thua lam tron con lai (tong surplus moi tran - da chi quy chung).
+    total_rounding_surplus_amount = quy_chung_balance(db)
 
     return {
         "member_total_balance": member_total_balance,
