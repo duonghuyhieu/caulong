@@ -5,6 +5,7 @@ from sqlalchemy import select, func
 
 from app.models.fund_transaction import FundTransaction
 from app.models.member import Member
+from app.models.play_session import PlaySession
 from app.schemas.fund_transaction import (
     CategoryExpenseCreate,
     CommonFundExpenseCreate,
@@ -217,11 +218,10 @@ def get_fund_summary(db: Session) -> dict:
         )
     ) or 0
 
+    # Tien thua lam tron ("quy chung"): cong don chenh lech tien thu - chi phi
+    # that cua tung tran (surplus_amount). Day la tien du ra do lam tron moi tran.
     total_rounding_surplus_amount = db.scalar(
-        select(func.coalesce(func.sum(FundTransaction.amount), 0)).where(
-            FundTransaction.type == "rounding_surplus",
-            FundTransaction.voided_at.is_(None),
-        )
+        select(func.coalesce(func.sum(PlaySession.surplus_amount), 0))
     ) or 0
 
     return {

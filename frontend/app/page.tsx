@@ -76,15 +76,15 @@ function TreasurerDashboard({
   summary: FundSummary;
   budget: CostByCategoryReport | null;
 }) {
-  // Cac tui tien theo NOI tien dang nam (de khop voi "Chi quy"):
-  //   Quy chung = tien mat thu quy con giu, chua phan bo (= "Quy hien co",
-  //               Chi quy tru o day) = common_fund_balance
-  //   Ngan sach = tien da phan bo cho cac hang muc (dang o chu san/tap hoa)
-  //   Tong quy  = Quy chung + Ngan sach = tat ca tien nhom dang co
-  const cash = summary.common_fund_balance; // Quy chung (tien mat con giu)
-  const reserved = budget?.total_remaining ?? 0; // Ngan sach da phan bo
-  const totalFund = cash + reserved; // Tong quy
-  const playerFund = summary.member_total_balance; // Quy nguoi choi (thong tin)
+  // Cac tui tien:
+  //   Quy (tien nguoi choi) = tong so du moi nguoi = Ngan sach + Chua phan bo
+  //   Quy chung = tien thua lam tron sau moi tran (rieng, khong thuoc quy)
+  //   Tong quy = Quy + Quy chung
+  const playerFund = summary.member_total_balance; // Quy (tien nguoi choi)
+  const reserved = budget?.total_remaining ?? 0; // Ngan sach da phan bo, con lai
+  const unallocated = playerFund - reserved; // Chua phan bo
+  const commonFund = summary.total_rounding_surplus_amount; // Quy chung = tien thua lam tron
+  const totalFund = playerFund + commonFund; // Tong quy
   const cats = budget?.categories ?? [];
 
   return (
@@ -109,25 +109,39 @@ function TreasurerDashboard({
         <div className="dash-hero-value">{formatMoney(totalFund)}</div>
 
         <div className="dash-breakdown">
-          {/* Quy chung = tien mat con giu, noi "Chi quy" tru tien */}
-          <div className="dash-bd-row dash-bd-main">
-            <span className="dash-bd-name">
-              <i className="dash-dot dash-dot-fund" aria-hidden />
-              Quỹ chung <em>tiền mặt còn giữ</em>
-            </span>
-            <b className={`dash-bd-amt${cash < 0 ? " neg" : ""}`}>
-              {formatMoney(cash)}
-            </b>
+          {/* Quy = tien cua nguoi choi (Ngan sach + Chua phan bo) */}
+          <div className="dash-bd-group">
+            <div className="dash-bd-row dash-bd-main">
+              <span className="dash-bd-name">
+                <i className="dash-dot dash-dot-fund" aria-hidden />
+                Quỹ <em>tiền người chơi</em>
+              </span>
+              <b className={`dash-bd-amt${playerFund < 0 ? " neg" : ""}`}>
+                {formatMoney(playerFund)}
+              </b>
+            </div>
+            <div className="dash-bd-row dash-bd-sub">
+              <span className="dash-bd-name">Ngân sách · đã phân bổ</span>
+              <b className={`dash-bd-amt${reserved < 0 ? " neg" : ""}`}>
+                {budget ? formatMoney(reserved) : "…"}
+              </b>
+            </div>
+            <div className="dash-bd-row dash-bd-sub">
+              <span className="dash-bd-name">Chưa phân bổ</span>
+              <b className={`dash-bd-amt${unallocated < 0 ? " neg" : ""}`}>
+                {budget ? formatMoney(unallocated) : "…"}
+              </b>
+            </div>
           </div>
 
-          {/* Ngan sach = da phan bo cho cac hang muc */}
+          {/* Quy chung = tien thua lam tron, rieng (khong thuoc quy) */}
           <div className="dash-bd-row dash-bd-main">
             <span className="dash-bd-name">
               <i className="dash-dot dash-dot-surplus" aria-hidden />
-              Ngân sách <em>đã phân bổ</em>
+              Quỹ chung <em>tiền thừa làm tròn</em>
             </span>
-            <b className={`dash-bd-amt${reserved < 0 ? " neg" : ""}`}>
-              {budget ? formatMoney(reserved) : "…"}
+            <b className={`dash-bd-amt${commonFund < 0 ? " neg" : ""}`}>
+              {formatMoney(commonFund)}
             </b>
           </div>
         </div>
@@ -135,19 +149,6 @@ function TreasurerDashboard({
 
       {/* Cac chi so nhanh */}
       <div className="grid">
-        <div className="card stat">
-          {/* Icon: wallet */}
-          <svg className="dash-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
-            <path d="M20 12V22H4V12" />
-            <path d="M22 7H2v5h20V7z" />
-            <path d="M12 22V7" />
-            <path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z" />
-            <path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z" />
-          </svg>
-          <div className="label">Quỹ · tiền người chơi</div>
-          <div className={`value${playerFund < 0 ? " warn" : ""}`}>{formatMoney(playerFund)}</div>
-        </div>
-
         <div className="card stat">
           {/* Icon: users */}
           <svg className="dash-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
