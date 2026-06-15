@@ -21,7 +21,7 @@ export const TRANSACTION_TYPE_LABEL: Record<string, string> = {
   rounding_surplus: "Dư làm tròn",
   manual_adjustment: "Điều chỉnh",
   session_refund: "Hoàn tiền",
-  common_fund_expense: "Chi quỹ chung",
+  common_fund_expense: "Chi quỹ",
   session_payment: "Người chơi trả quỹ",
   session_expense: "Quỹ chi buổi chơi",
   category_expense: "Phân bổ ngân sách",

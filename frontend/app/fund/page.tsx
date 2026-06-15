@@ -112,7 +112,7 @@ export default function FundPage() {
         {isTreasurer && (
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             <button type="button" className="ghost" onClick={() => setDialog("common")}>
-              Chi quỹ chung
+              Chi quỹ
             </button>
             <button type="button" className="ghost" onClick={() => setDialog("adjust")}>
               Điều chỉnh
@@ -202,7 +202,7 @@ export default function FundPage() {
                         <div className="drow">
                           <span className="k">Thành viên</span>
                           <span className="v">
-                            {t.member_id ? memberName.get(t.member_id) ?? "?" : "Quỹ chung"}
+                            {t.member_id ? memberName.get(t.member_id) ?? "?" : "Quỹ"}
                           </span>
                         </div>
                       )}
@@ -252,7 +252,7 @@ export default function FundPage() {
         <AdjustForm members={members} onDone={afterDialog} />
       </Dialog>
 
-      <Dialog open={dialog === "common"} onClose={() => setDialog(null)} title="Chi quỹ chung">
+      <Dialog open={dialog === "common"} onClose={() => setDialog(null)} title="Chi quỹ">
         <CommonExpenseForm balance={summary?.common_fund_balance ?? 0} onDone={afterDialog} />
       </Dialog>
     </div>
@@ -295,7 +295,7 @@ function CommonExpenseForm({ balance, onDone }: { balance: number; onDone: () =>
     >
       <div className="summary">
         <div className="item">
-          <span className="k">Quỹ chung hiện có</span>
+          <span className="k">Quỹ hiện có</span>
           <span className="v accent">{formatMoney(balance)}</span>
         </div>
         {value > 0 && !overBalance && (
@@ -339,11 +339,11 @@ function CommonExpenseForm({ balance, onDone }: { balance: number; onDone: () =>
         />
       </div>
 
-      {overBalance && <p className="error">Vượt quá quỹ chung hiện có ({formatMoney(balance)}).</p>}
+      {overBalance && <p className="error">Vượt quá quỹ hiện có ({formatMoney(balance)}).</p>}
       {error && <p className="error">{error}</p>}
 
       <button type="submit" disabled={submitting || value <= 0 || overBalance}>
-        {submitting ? "Đang lưu..." : "Chi quỹ chung"}
+        {submitting ? "Đang lưu..." : "Chi quỹ"}
       </button>
     </form>
   );

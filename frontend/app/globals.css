@@ -1633,6 +1633,79 @@ button.ghost:hover {
   color: var(--neg);
 }
 
+/* Breakdown cac tui tien: Quy (Ngan sach + Chua phan bo) + Quy chung */
+.dash-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.9rem;
+}
+.dash-bd-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.dash-bd-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.32rem 0;
+}
+.dash-bd-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.dash-bd-name em {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.dash-bd-amt {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dash-bd-amt.neg {
+  color: var(--neg);
+}
+/* Dong chinh: Quy, Quy chung */
+.dash-bd-main {
+  font-weight: 640;
+}
+.dash-bd-main .dash-bd-amt {
+  font-weight: 660;
+  font-size: 1rem;
+}
+/* Dong phu: Ngan sach, Chua phan bo — thut le, mo hon */
+.dash-bd-sub {
+  padding-left: 1.3rem;
+  position: relative;
+}
+.dash-bd-sub .dash-bd-name {
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+.dash-bd-sub .dash-bd-amt {
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+/* Vach noi cac dong phu vao dong chinh */
+.dash-bd-sub::before {
+  content: "";
+  position: absolute;
+  left: 0.45rem;
+  top: 0;
+  bottom: 0.5rem;
+  width: 1px;
+  background: var(--line);
+}
+.dash-dot-fund { background: var(--accent); }
+.dash-dot-surplus { background: var(--pos); }
+
 /* Thanh phan bo (flow bar) — cao hon, gradient moi */
 .dash-flow-bar {
   display: flex;

@@ -66,7 +66,7 @@ export default function ReportsPage() {
       </div>
 
       <p className="muted budget-hint">
-        Mọi người đóng vào quỹ chung, thủ quỹ phân bổ tiền đó cho từng khoản phải chi.
+        Mọi người đóng vào quỹ, thủ quỹ phân bổ tiền đó cho từng khoản phải chi.
         Mỗi buổi chơi sẽ trừ dần vào khoản tương ứng.
       </p>
 
@@ -123,7 +123,7 @@ export default function ReportsPage() {
       ) : (
         <div className="card">
           <p className="muted center" style={{ padding: "1.2rem 0" }}>
-            Chưa có hạng mục nào. Bấm "Hạng mục" để tạo, rồi "+ Phân bổ" để chia tiền từ quỹ chung.
+            Chưa có hạng mục nào. Bấm "Hạng mục" để tạo, rồi "+ Phân bổ" để chia tiền từ quỹ.
           </p>
         </div>
       )}
@@ -207,7 +207,7 @@ function PaymentForm({ onDone }: { onDone: () => void }) {
         </select>
       </div>
       <div className="field">
-        <label>Số tiền phân bổ (lấy từ quỹ chung)</label>
+        <label>Số tiền phân bổ (lấy từ quỹ)</label>
         <MoneyInput
           placeholder="vd: 2.000.000"
           value={amount}
