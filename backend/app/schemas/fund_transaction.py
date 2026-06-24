@@ -12,6 +12,7 @@ FundTransactionType = Literal[
     "session_refund",
     "common_fund_expense",
     "surplus_expense",
+    "quy_chung_income",
     "session_payment",
     "session_expense",
     "category_expense",
@@ -31,6 +32,14 @@ class CommonFundExpenseCreate(BaseModel):
     amount: int = Field(gt=0)
     description: str = Field(min_length=1, max_length=500)
     source: Literal["quy", "quy_chung"] = "quy"
+
+
+class CommonFundIncomeCreate(BaseModel):
+    """Cong tien vao Quy chung (vd: donate, tien thuong khi danh giai).
+    amount > 0 la so tien cong vao."""
+
+    amount: int = Field(gt=0)
+    description: str = Field(min_length=1, max_length=500)
 
 
 class CategoryExpenseCreate(BaseModel):

@@ -21,7 +21,7 @@ export default function FundPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<FundSummary | null>(null);
-  const [dialog, setDialog] = useState<"deposit" | "adjust" | "common" | null>(null);
+  const [dialog, setDialog] = useState<"deposit" | "adjust" | "common" | "income" | null>(null);
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
@@ -111,6 +111,9 @@ export default function FundPage() {
         <h1>Sổ quỹ</h1>
         {isTreasurer && (
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <button type="button" className="ghost" onClick={() => setDialog("income")}>
+              + Quỹ chung
+            </button>
             <button type="button" className="ghost" onClick={() => setDialog("common")}>
               Chi quỹ
             </button>
@@ -259,6 +262,13 @@ export default function FundPage() {
           onDone={afterDialog}
         />
       </Dialog>
+
+      <Dialog open={dialog === "income"} onClose={() => setDialog(null)} title="Cộng quỹ chung">
+        <QuyChungIncomeForm
+          surplus={summary?.total_rounding_surplus_amount ?? 0}
+          onDone={afterDialog}
+        />
+      </Dialog>
     </div>
   );
 }
@@ -283,7 +293,8 @@ function CommonExpenseForm({
   const value = Number(amount) || 0;
   const balance = source === "quy_chung" ? surplus : cash;
   const balanceLabel = source === "quy_chung" ? "Quỹ chung hiện có" : "Quỹ hiện có";
-  const overBalance = value > balance;
+  // Quy chung duoc phep am; chi chan vuot so du voi nguon tien mat (quy).
+  const overBalance = source !== "quy_chung" && value > balance;
 
   function addAmount(delta: number) {
     setAmount((prev) => String((Number(prev) || 0) + delta));
@@ -372,6 +383,96 @@ function CommonExpenseForm({
 
       <button type="submit" disabled={submitting || value <= 0 || overBalance}>
         {submitting ? "Đang lưu..." : source === "quy_chung" ? "Chi quỹ chung" : "Chi quỹ"}
+      </button>
+    </form>
+  );
+}
+
+// Cong tien vao Quy chung (donate, tien thuong khi danh giai).
+function QuyChungIncomeForm({ surplus, onDone }: { surplus: number; onDone: () => void }) {
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const value = Number(amount) || 0;
+
+  function addAmount(delta: number) {
+    setAmount((prev) => String((Number(prev) || 0) + delta));
+  }
+
+  async function submit() {
+    setError(null);
+    setSubmitting(true);
+    try {
+      await fundApi.addQuyChungIncome({ amount: value, description });
+      onDone();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Không cộng được");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void submit();
+      }}
+    >
+      <div className="summary">
+        <div className="item">
+          <span className="k">Quỹ chung hiện có</span>
+          <span className="v accent" style={surplus < 0 ? { color: "var(--neg)" } : undefined}>
+            {formatMoney(surplus)}
+          </span>
+        </div>
+        {value > 0 && (
+          <div className="item">
+            <span className="k">Sau khi cộng</span>
+            <span className="v">{formatMoney(surplus + value)}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="field">
+        <label>Số tiền cộng (đồng)</label>
+        <MoneyInput
+          placeholder="vd: 500.000"
+          value={amount}
+          onChange={setAmount}
+          required
+          autoFocus
+        />
+        <div className="chips" style={{ marginTop: "0.5rem" }}>
+          {[100000, 200000, 500000].map((v) => (
+            <button type="button" key={v} className="chip" onClick={() => addAmount(v)}>
+              +{v / 1000}K
+            </button>
+          ))}
+          {amount && (
+            <button type="button" className="chip" onClick={() => setAmount("")}>
+              Xoá
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="field">
+        <label>Nguồn / nội dung</label>
+        <input
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="vd: Donate từ A, tiền thưởng đánh giải"
+          required
+        />
+      </div>
+
+      {error && <p className="error">{error}</p>}
+
+      <button type="submit" disabled={submitting || value <= 0}>
+        {submitting ? "Đang lưu..." : "Cộng quỹ chung"}
       </button>
     </form>
   );

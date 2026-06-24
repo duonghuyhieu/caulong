@@ -44,6 +44,7 @@ export type FundTransactionType =
   | "session_refund"
   | "common_fund_expense"
   | "surplus_expense"
+  | "quy_chung_income"
   | "session_payment"
   | "session_expense"
   | "category_expense";
@@ -98,6 +99,12 @@ export interface CommonFundExpenseInput {
   amount: number; // > 0, so tien chi ra
   description: string;
   source?: "quy" | "quy_chung"; // quy = tien mat; quy_chung = tien thua lam tron
+}
+
+// Cong tien vao Quy chung (donate, tien thuong khi danh giai).
+export interface CommonFundIncomeInput {
+  amount: number; // > 0, so tien cong vao
+  description: string;
 }
 
 export interface PlaySessionParticipant {

@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.models.member import Member
 from app.services.auth import get_current_member, require_treasurer
 from app.services.fund_transactions import (
+    add_quy_chung_income,
     adjust_member_fund,
     deposit_member_fund,
     get_fund_summary,
@@ -15,6 +16,7 @@ from app.services.fund_transactions import (
 from app.schemas.fund_transaction import (
     CategoryExpenseCreate,
     CommonFundExpenseCreate,
+    CommonFundIncomeCreate,
     FundAdjustmentCreate,
     FundSummaryRead,
     FundTransactionRead,
@@ -58,6 +60,15 @@ def spend_common_fund_endpoint(
     current_member: Member = Depends(require_treasurer),
 ):
     return spend_common_fund(db, payload, current_member)
+
+
+@router.post("/quy-chung-income", response_model=FundTransactionRead, status_code=201)
+def add_quy_chung_income_endpoint(
+    payload: CommonFundIncomeCreate,
+    db: Session = Depends(get_db),
+    current_member: Member = Depends(require_treasurer),
+):
+    return add_quy_chung_income(db, payload, current_member)
 
 
 @router.post("/category-expense", response_model=FundTransactionRead, status_code=201)

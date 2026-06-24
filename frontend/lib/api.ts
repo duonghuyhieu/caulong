@@ -7,6 +7,7 @@ import type {
   AdjustmentInput,
   CategoryExpenseInput,
   CommonFundExpenseInput,
+  CommonFundIncomeInput,
   CostByCategoryReport,
   CostCategory,
   DepositInput,
@@ -126,6 +127,8 @@ export const fundApi = {
     request<FundTransaction>("/fund/adjustments", { method: "POST", body: input }),
   spendCommon: (input: CommonFundExpenseInput) =>
     request<FundTransaction>("/fund/common-expense", { method: "POST", body: input }),
+  addQuyChungIncome: (input: CommonFundIncomeInput) =>
+    request<FundTransaction>("/fund/quy-chung-income", { method: "POST", body: input }),
   spendCategory: (input: CategoryExpenseInput) =>
     request<FundTransaction>("/fund/category-expense", { method: "POST", body: input }),
 };

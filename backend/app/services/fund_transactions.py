@@ -9,6 +9,7 @@ from app.models.play_session import PlaySession
 from app.schemas.fund_transaction import (
     CategoryExpenseCreate,
     CommonFundExpenseCreate,
+    CommonFundIncomeCreate,
     FundAdjustmentCreate,
     MemberDepositCreate,
 )
@@ -36,18 +37,19 @@ def common_fund_balance(db: Session) -> int:
 
 
 def quy_chung_balance(db: Session) -> int:
-    """Quy chung = tien thua lam tron con lai = tong surplus moi tran - da chi quy chung."""
+    """Quy chung = tien thua lam tron + tien cong them (donate/danh giai) - da chi quy chung.
+    Co the AM (chi nhieu hon thu)."""
     surplus_income = db.scalar(
         select(func.coalesce(func.sum(PlaySession.surplus_amount), 0))
     ) or 0
-    surplus_spent = db.scalar(
+    # Cong them vao quy chung (donate, tien thuong) = amount duong; chi ra = amount am.
+    quy_chung_moves = db.scalar(
         select(func.coalesce(func.sum(FundTransaction.amount), 0)).where(
-            FundTransaction.type == "surplus_expense",
+            FundTransaction.type.in_(["surplus_expense", "quy_chung_income"]),
             FundTransaction.voided_at.is_(None),
         )
     ) or 0
-    # surplus_spent la so am (chi ra) nen cong vao.
-    return surplus_income + surplus_spent
+    return surplus_income + quy_chung_moves
 
 
 def get_member_or_404(db: Session, member_id: str) -> Member:
@@ -126,14 +128,10 @@ def spend_common_fund(
     payload: CommonFundExpenseCreate,
     created_by: Member,
 ) -> FundTransaction:
-    """Chi tien cho hoat dong tap the. Khong duoc chi vuot so du cua nguon da chon."""
+    """Chi tien cho hoat dong tap the.
+    - Nguon 'quy' (tien mat): khong duoc chi vuot so du.
+    - Nguon 'quy_chung': CHO PHEP am (chi nhieu hon thu)."""
     if payload.source == "quy_chung":
-        balance = quy_chung_balance(db)
-        if payload.amount > balance:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Quỹ chung không đủ. Hiện có: {balance}.",
-            )
         tx_type = "surplus_expense"
     else:
         balance = common_fund_balance(db)
@@ -148,6 +146,34 @@ def spend_common_fund(
         member_id=None,
         type=tx_type,
         amount=-payload.amount,
+        balance_after=None,
+        description=payload.description,
+        created_by_member_id=created_by.id,
+    )
+
+    db.add(transaction)
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid fund transaction data")
+
+    db.refresh(transaction)
+
+    return transaction
+
+
+def add_quy_chung_income(
+    db: Session,
+    payload: CommonFundIncomeCreate,
+    created_by: Member,
+) -> FundTransaction:
+    """Cong tien vao Quy chung (donate, tien thuong khi danh giai)."""
+    transaction = FundTransaction(
+        member_id=None,
+        type="quy_chung_income",
+        amount=payload.amount,
         balance_after=None,
         description=payload.description,
         created_by_member_id=created_by.id,
